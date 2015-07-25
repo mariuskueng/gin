@@ -1,0 +1,23 @@
+{
+  "name": "gin",
+  "version": "1.0.0",
+  "description": "Realtime Markdown Editor",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mariuskueng/gin.git"
+  },
+  "keywords": [
+    "markdown",
+    "realtime",
+    "sharejs"
+  ],
+  "author": "Marius Küng",
+  "bugs": {
+    "url": "https://github.com/mariuskueng/gin/issues"
+  },
+  "homepage": "https://github.com/mariuskueng/gin"
+}
