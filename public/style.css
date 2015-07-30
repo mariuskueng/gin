@@ -2,6 +2,7 @@
 
 html, body, section, .full-height {
     height: 100%;
+    font-family: Helvetica, Arial, sans-serif;
 }
 
 #pad{

@@ -2,7 +2,7 @@
   "name": "gin",
   "version": "1.0.0",
   "description": "Realtime Markdown Editor",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
