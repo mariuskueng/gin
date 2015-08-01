@@ -1,0 +1,20 @@
+{
+  "name": "gin",
+  "version": "0.0.1",
+  "authors": [
+    "Marius Küng"
+  ],
+  "description": "JavaScript Markdown Editor for Mac",
+  "main": "main.js",
+  "license": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "codemirror": "~5.5.0"
+  }
+}
