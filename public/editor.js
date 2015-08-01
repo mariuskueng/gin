@@ -3,17 +3,20 @@ onload = function() {
     document.getElementById("editor"),
     {
       mode: {
-        name: "Markdown",
-        json: true
+        name: 'gfm',
+        highlightFormatting: true
       },
-      lineNumbers: true,
-      theme: "lesser-dark",
+      lineWrapping: true,
+      tabSize: 2,
+      viewportMargin: Infinity,
+      theme: "lesser-bright",
+      value: "# This is some Markdown \nIt's **awesome**.",
       extraKeys: {
         "Cmd-S": function(instance) {
-          handleSaveButton();
+          // handleSaveButton();
         },
         "Ctrl-S": function(instance) {
-          handleSaveButton();
+          // handleSaveButton();
         },
       }
     }
