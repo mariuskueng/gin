@@ -4,6 +4,7 @@ var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
 var fs = require('fs');
 var showdown  = require('showdown');
+var clipboard = require('clipboard');
 
 var editor, preview, converter, cm, menu, file, text;
 
@@ -81,6 +82,15 @@ onload = function() {
         "Cmd-S": function(instance) {
           writeFile();
         },
+        "Cmd-V": function(instance) {
+          console.log('paste');
+          instance.replaceSelection(clipboard.readText());
+
+        },
+        "Cmd-C": function(instance) {
+          console.log('copy');
+          clipboard.writeText(cm.getSelection());
+        }
       }
     }
   );
