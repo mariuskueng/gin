@@ -76,6 +76,7 @@ onload = function() {
       },
       lineWrapping: true,
       tabSize: 2,
+      viewportMargin: Infinity,
       theme: "gin",
       value: "# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n",
       extraKeys: {

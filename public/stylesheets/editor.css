@@ -1,19 +1,11 @@
 body {
-  margin: 0;
+  margin: 50px 20px;
   padding: 0;
-  margin-top: 5px;
-  overflow: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
 #editor {
-  bottom: 0;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 100%;
+  margin: 0 auto;
 }
 
 #editor.preview-visible {
@@ -27,11 +19,22 @@ body {
   width: 80%;
 }
 
+/* CodeMirror */
+
+.CodeMirror {
+  font-family: "Menlo", "Courier" monospace;
+  font-size: 1rem;
+  height: auto;
+  line-height: 1.5;
+}
+
 .CodeMirror-scroll {
   margin: 0 auto;
   width: 50%;
 }
 
-.CodeMirror-sizer {
-  margin: 50px 0;
+@media (max-width: 750px) {
+  .CodeMirror-scroll {
+    width: 80%;
+  }
 }
