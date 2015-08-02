@@ -87,6 +87,13 @@ onload = function() {
 
   setWindowTitle('Untitled');
   togglePreview();
+  renderMarkdown();
+
+  // re-render Markdown on every CodeMirror change event
+  cm.on("change", function(e) {
+    renderMarkdown();
+  });
+
 };
 
 function readFile() {
@@ -140,5 +147,10 @@ function setWindowTitle(title) {
 }
 
 function togglePreview() {
+  editor.classList.toggle('preview-visible');
+  preview.classList.toggle('preview-visible');
+}
+
+function renderMarkdown() {
   preview.innerHTML = converter.makeHtml(cm.getValue());
 }

@@ -15,3 +15,11 @@
 #preview.preview-visible {
   display: block;
 }
+
+#preview li {
+  color: #2ca997;
+}
+
+#preview a {
+  color: #3496bd;
+}
