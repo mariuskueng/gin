@@ -3,28 +3,29 @@ var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
 var fs = require('fs');
+var showdown  = require('showdown');
 
-var editor, cm, menu, file, text;
+var editor, preview, converter, cm, menu, file, text;
 
 var menuTemplate = [
   {
     label: 'File',
     submenu: [
       {
-          label: 'Open File',
-          accelerator: 'Cmd+O',
-          click: function() {
-            var properties = ['multiSelections', 'createDirectory', 'openFile'];
-            var parentWindow = (process.platform == 'darwin') ? null : BrowserWindow.getFocusedWindow();
+        label: 'Open File',
+        accelerator: 'Cmd+O',
+        click: function() {
+          var properties = ['multiSelections', 'createDirectory', 'openFile'];
+          var parentWindow = (process.platform == 'darwin') ? null : BrowserWindow.getFocusedWindow();
 
-            dialog.showOpenDialog(parentWindow, properties, function(f) {
-              console.log("got a file: " + f);
-              if (f) {
-                file = f[0];
-                readFile();
-              }
-            });
-          }
+          dialog.showOpenDialog(parentWindow, properties, function(f) {
+            console.log("got a file: " + f);
+            if (f) {
+              file = f[0];
+              readFile();
+            }
+          });
+        }
       },
       {
         label: 'Save File',
@@ -39,6 +40,18 @@ var menuTemplate = [
         click: function() { app.quit(); }
       },
     ]
+  },
+  {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Toggle Preview',
+        accelerator: 'Alt+Cmd+P',
+        click: function() {
+          togglePreview();
+        }
+      }
+    ]
   }
 ];
 
@@ -48,6 +61,9 @@ Menu.setApplicationMenu(menu);
 
 onload = function() {
   editor = document.getElementById("editor");
+  preview = document.getElementById("preview");
+
+  converter = new showdown.Converter();
 
   cm = CodeMirror(
     editor,
@@ -70,6 +86,7 @@ onload = function() {
   );
 
   setWindowTitle('Untitled');
+  togglePreview();
 };
 
 function readFile() {
@@ -120,4 +137,8 @@ function setWindowTitle(title) {
     title = titleParts[titleParts.length - 1];
   }
   BrowserWindow.getFocusedWindow().setTitle(title);
+}
+
+function togglePreview() {
+  preview.innerHTML = converter.makeHtml(cm.getValue());
 }

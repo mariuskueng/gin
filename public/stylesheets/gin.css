@@ -1,23 +1,3 @@
-/* public/style.css */
-
-body {
-  margin: 0;
-  padding: 0;
-  margin-top: 5px;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
-
-#editor {
-  bottom: 0;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 100%;
-}
-
 /* gin theme */
 
 .CodeMirror {
@@ -25,7 +5,7 @@ body {
   font-size: 1rem;
   height: 100%;
   line-height: 1.5;
-  margin: 50px auto;
+  margin: 30px auto;
   padding: 0;
   width: 50%;
 }

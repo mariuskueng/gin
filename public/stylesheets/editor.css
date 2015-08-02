@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  padding: 0;
+  margin-top: 5px;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#editor {
+  bottom: 0;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+}
+
+#editor.preview-visible {
+  right: 50%;
+  width: 50%;
+}
+
+#editor.preview-visible .CodeMirror {
+  margin-left: 20px;
+  margin-right: 0;
+}
