@@ -9,7 +9,7 @@ onload = function() {
       lineWrapping: true,
       tabSize: 2,
       viewportMargin: Infinity,
-      theme: "lesser-bright",
+      theme: "gin",
       value: "# This is some Markdown \nIt's **awesome**.",
       extraKeys: {
         "Cmd-S": function(instance) {
