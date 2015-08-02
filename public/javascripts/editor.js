@@ -96,8 +96,6 @@ onload = function() {
   );
 
   setWindowTitle('Untitled');
-  togglePreview();
-  renderMarkdown();
 
   // re-render Markdown on every CodeMirror change event
   cm.on("change", function(e) {
@@ -159,6 +157,7 @@ function setWindowTitle(title) {
 function togglePreview() {
   editor.classList.toggle('preview-visible');
   preview.classList.toggle('preview-visible');
+  renderMarkdown();
 }
 
 function renderMarkdown() {
