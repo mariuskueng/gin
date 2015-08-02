@@ -26,3 +26,12 @@ body {
   margin-right: 0;
   width: 80%;
 }
+
+.CodeMirror-scroll {
+  margin: 0 auto;
+  width: 50%;
+}
+
+.CodeMirror-sizer {
+  margin: 50px 0;
+}

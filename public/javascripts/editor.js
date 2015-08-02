@@ -76,9 +76,8 @@ onload = function() {
       },
       lineWrapping: true,
       tabSize: 2,
-      viewportMargin: Infinity,
       theme: "gin",
-      value: "# This is some Markdown \nIt's **awesome**.",
+      value: "# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n# This is some Markdown \nIt's **awesome**.\n",
       extraKeys: {
         "Cmd-S": function(instance) {
           writeFile();
