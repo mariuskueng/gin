@@ -1,4 +1,5 @@
 var remote = require('remote');
+var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
 var fs = require('fs');
@@ -18,8 +19,10 @@ var menuTemplate = [
 
             dialog.showOpenDialog(parentWindow, properties, function(f) {
               console.log("got a file: " + f);
-              file = f[0];
-              readFile();
+              if (f) {
+                file = f[0];
+                readFile();
+              }
             });
           }
       },
@@ -60,14 +63,13 @@ onload = function() {
       value: "# This is some Markdown \nIt's **awesome**.",
       extraKeys: {
         "Cmd-S": function(instance) {
-          // handleSaveButton();
-        },
-        "Ctrl-S": function(instance) {
-          // handleSaveButton();
+          writeFile();
         },
       }
     }
   );
+
+  setWindowTitle('Untitled');
 };
 
 function readFile() {
@@ -76,16 +78,46 @@ function readFile() {
       if (err) throw err;
       text = data;
       cm.setValue(text);
+      setWindowTitle(file);
       console.log('Read a file.');
     });
   }
 }
 
-function writeFile() {
+function writeFile(callback) {
   if (file) {
     text = cm.getValue();
     fs.writeFile(file, cm.getValue(), 'utf8', function() {
       console.log('Wrote a file.');
     });
+  } else {
+    console.log('no file specified. create new file.');
+    createFile();
   }
+  if (callback) callback();
+}
+
+function createFile() {
+  dialog.showSaveDialog({ filters: [
+     { name: 'Markdown', extensions: ['md', 'markdown'] }
+    ]}, function (fileName) {
+      if (fileName === undefined) return;
+
+      file = fileName;
+      writeFile(function (err){
+        if (err === undefined) {
+          setWindowTitle(file);
+        } else {
+          dialog.showErrorBox("File Save Error", err.message);
+        }
+      });
+  });
+}
+
+function setWindowTitle(title) {
+  if (title.indexOf('/') > -1) {
+    var titleParts = title.split('/');
+    title = titleParts[titleParts.length - 1];
+  }
+  BrowserWindow.getFocusedWindow().setTitle(title);
 }
