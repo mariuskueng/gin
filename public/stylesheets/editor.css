@@ -1,22 +1,28 @@
 body {
-  margin: 50px 20px;
+  margin: 25px 20px;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+}
+
+body.preview-visible {
+  overflow: hidden;
 }
 
 #editor {
   margin: 0 auto;
 }
 
-#editor.preview-visible {
+body.preview-visible #editor {
+  height: 100%;
+  overflow: auto;
+  position: absolute;
   right: 50%;
   width: 50%;
 }
 
-#editor.preview-visible .CodeMirror {
-  margin-left: 20px;
-  margin-right: 0;
-  width: 80%;
+body.preview-visible #editor .CodeMirror-scroll {
+  margin: 0 auto;
+  width: 90%;
 }
 
 /* CodeMirror */

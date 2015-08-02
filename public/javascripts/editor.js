@@ -156,8 +156,7 @@ function setWindowTitle(title) {
 }
 
 function togglePreview() {
-  editor.classList.toggle('preview-visible');
-  preview.classList.toggle('preview-visible');
+  document.body.classList.toggle('preview-visible');
   renderMarkdown();
 }
 
