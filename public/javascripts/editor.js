@@ -1,4 +1,5 @@
 var remote = require('remote');
+var app = remote.require('app');
 var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
