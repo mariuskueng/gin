@@ -11,6 +11,23 @@ var editor, preview, converter, cm, menu, file, text;
 
 var menuTemplate = [
   {
+    label: 'Gin',
+    submenu: [
+      {
+        label: 'About Gin',
+      },
+      {
+        label: 'Preferences...',
+        accelerator: 'Cmd+,',
+      },
+      {
+        label: 'Quit',
+        accelerator: 'Cmd+Q',
+        click: function() { app.quit(); }
+      }
+    ]
+  },
+  {
     label: 'File',
     submenu: [
       {
@@ -35,12 +52,28 @@ var menuTemplate = [
         click: function() {
           writeFile();
         }
+      }
+    ]
+  },
+  {
+    label: 'Format',
+    submenu: [
+      {
+        label: 'Link',
+        accelerator: 'Cmd+K',
       },
       {
-        label: 'Quit',
-        accelerator: 'Cmd+Q',
-        click: function() { app.quit(); }
+        label: 'Bold',
+        accelerator: 'Cmd+B',
       },
+      {
+        label: 'Italic',
+        accelerator: 'Cmd+I',
+      },
+      {
+        label: 'Underline',
+        accelerator: 'Cmd+U',
+      }
     ]
   },
   {
@@ -77,6 +110,7 @@ onload = function() {
       lineWrapping: true,
       tabSize: 2,
       viewportMargin: Infinity,
+      autofocus: true,
       theme: "gin",
       // value: "# This is some Markdown \nIt's **awesome**.\n",
       extraKeys: {
