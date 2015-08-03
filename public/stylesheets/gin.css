@@ -18,3 +18,8 @@
   color: #2095bd;
   text-decoration: none;
 }
+
+img {
+  height: auto;
+  width: 75%;
+}

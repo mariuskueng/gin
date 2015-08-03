@@ -21,8 +21,8 @@ body.preview-visible #editor {
 }
 
 body.preview-visible #editor .CodeMirror-scroll {
-  margin: 0 auto;
-  width: 90%;
+  margin: 0 20px;
+  width: auto;
 }
 
 /* CodeMirror */
