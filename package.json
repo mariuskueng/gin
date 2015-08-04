@@ -1,6 +1,6 @@
 {
   "name": "gin",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "JavaScript Markdown Editor for Mac",
   "main": "main.js",
   "scripts": {
