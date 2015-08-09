@@ -74,10 +74,16 @@ var menuTemplate = [
       {
         label: 'Undo',
         accelerator: 'Cmd+Z',
+        click: function() {
+          cm.execCommand("undo");
+        }
       },
       {
         label: 'Redo',
-        accelerator: 'Cmd+Y',
+        accelerator: 'Shift+Cmd+Z',
+        click: function() {
+          cm.execCommand("redo");
+        }
       },
       {
         type: 'separator'
