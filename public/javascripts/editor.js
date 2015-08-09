@@ -94,6 +94,9 @@ var menuTemplate = [
       {
         label: 'Select All',
         accelerator: 'Cmd+A',
+        click: function() {
+          cm.execCommand("selectAll");
+        }
       }
     ]
   },
@@ -108,7 +111,7 @@ var menuTemplate = [
           if (text === '') {
             cm.replaceSelection("[]()");
             var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line , ch : cursor.ch - 3 });
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
           } else {
             text = "[" + cm.getSelection() + "]()";
             cm.replaceSelection(text);
@@ -123,7 +126,7 @@ var menuTemplate = [
           if (text === '') {
             cm.replaceSelection("****");
             var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line , ch : cursor.ch - 2 });
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
           } else {
             text = "**" + cm.getSelection() + "**";
             cm.replaceSelection(text);
@@ -138,7 +141,7 @@ var menuTemplate = [
           if (text === '') {
             cm.replaceSelection("**");
             var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line , ch : cursor.ch - 1 });
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
           } else {
             text = "*" + cm.getSelection() + "*";
             cm.replaceSelection(text);
@@ -153,7 +156,7 @@ var menuTemplate = [
           if (text === '') {
             cm.replaceSelection("__");
             var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line , ch : cursor.ch - 1 });
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
           } else {
             text = "_" + cm.getSelection() + "_";
             cm.replaceSelection(text);
