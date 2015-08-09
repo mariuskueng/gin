@@ -56,6 +56,48 @@ var menuTemplate = [
     ]
   },
   {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'Cmd+Z',
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Cmd+Y',
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Cut',
+        accelerator: 'Cmd+X',
+        click: function() {
+          clipboard.writeText(cm.getSelection());
+          cm.replaceSelection('');
+        }
+      },
+      {
+        label: 'Copy',
+        accelerator: 'Cmd+C',
+        click: function() {
+          clipboard.writeText(cm.getSelection());
+        }
+      },
+      {
+        label: 'Paste',
+        accelerator: 'Cmd+V',
+        click: function() {
+          cm.replaceSelection(clipboard.readText());
+        }
+      },
+      {
+        label: 'Select All',
+        accelerator: 'Cmd+A',
+      }
+    ]
+  },
+  {
     label: 'Format',
     submenu: [
       {
@@ -111,27 +153,7 @@ onload = function() {
       tabSize: 2,
       viewportMargin: Infinity,
       autofocus: true,
-      theme: "gin",
-      // value: "# This is some Markdown \nIt's **awesome**.\n",
-      extraKeys: {
-        "Cmd-S": function(instance) {
-          writeFile();
-        },
-        "Cmd-V": function(instance) {
-          console.log('paste');
-          instance.replaceSelection(clipboard.readText());
-
-        },
-        "Cmd-C": function(instance) {
-          console.log('copy');
-          clipboard.writeText(cm.getSelection());
-        },
-        "Cmd-X": function(instance) {
-          console.log('cut');
-          clipboard.writeText(cm.getSelection());
-          instance.replaceSelection('');
-        }
-      }
+      theme: "gin"
     }
   );
 
