@@ -208,8 +208,6 @@ onload = function() {
     }
   );
 
-  setWindowTitle('Untitled');
-
   // re-render Markdown on every CodeMirror change event
   cm.on("change", function(e) {
     renderMarkdown();
