@@ -53,8 +53,7 @@ var menuTemplate = [
           dialog.showOpenDialog(parentWindow, properties, function(f) {
             console.log("got a file: " + f);
             if (f) {
-              file = f[0];
-              readFile();
+              readFile(f[0]);
             }
           });
         }
@@ -241,17 +240,26 @@ onload = function() {
     if (previewVisible) renderMarkdown();
   });
 
+  app.on('open-file', function(event, path) {
+    readFile(path);
+  });
+
 };
 
-function readFile() {
-  if (file) {
-    fs.readFile(file, 'utf8', function(err, data) {
+function readFile(newFile) {
+  if (newFile) {
+    fs.readFile(newFile, 'utf8', function(err, data) {
       if (err) throw err;
+      file = newFile;
       text = data;
       cm.setValue(text);
       setWindowTitle(file);
+      // Add file to recent docs in osx dock
+      app.addRecentDocument(file);
       console.log('Read a file.');
     });
+  } else {
+    console.error('No file given');
   }
 }
 
