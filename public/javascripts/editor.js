@@ -103,18 +103,34 @@ var menuTemplate = [
       {
         label: 'Link',
         accelerator: 'Cmd+K',
+        click: function() {
+          var text = "[" + cm.getSelection() + "]()";
+          cm.replaceSelection(text);
+        }
       },
       {
         label: 'Bold',
         accelerator: 'Cmd+B',
+        click: function() {
+          var text = "**" + cm.getSelection() + "**";
+          cm.replaceSelection(text);
+        }
       },
       {
         label: 'Italic',
         accelerator: 'Cmd+I',
+        click: function() {
+          var text = "*" + cm.getSelection() + "*";
+          cm.replaceSelection(text);
+        }
       },
       {
         label: 'Underline',
         accelerator: 'Cmd+U',
+        click: function() {
+          var text = "_" + cm.getSelection() + "_";
+          cm.replaceSelection(text);
+        }
       }
     ]
   },
