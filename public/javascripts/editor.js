@@ -125,6 +125,11 @@ onload = function() {
         "Cmd-C": function(instance) {
           console.log('copy');
           clipboard.writeText(cm.getSelection());
+        },
+        "Cmd-X": function(instance) {
+          console.log('cut');
+          clipboard.writeText(cm.getSelection());
+          instance.replaceSelection('');
         }
       }
     }
