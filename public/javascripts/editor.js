@@ -211,8 +211,16 @@ onload = function() {
 
   previewVisible = false;
 
-  converter = new showdown.Converter();
+  // showdown constructor
+  converter = new showdown.Converter({
+    strikethrough: true,
+    tables: true,
+    ghCodeBlocks: true,
+    tasklists: true,
+    smoothLivePreview: true
+  });
 
+  // CodeMirror constructor
   cm = CodeMirror(
     editor,
     {
