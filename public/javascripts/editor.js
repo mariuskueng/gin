@@ -35,6 +35,15 @@ var menuTemplate = [
     label: 'File',
     submenu: [
       {
+        label: 'New File',
+        accelerator: 'Cmd+N',
+        click: function() {
+          console.log('New file');
+          console.warn('Careful, same instance');
+          window.open('file://' + __dirname + '/index.html');
+        }
+      },
+      {
         label: 'Open File',
         accelerator: 'Cmd+O',
         click: function() {
