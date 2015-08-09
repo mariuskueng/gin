@@ -8,7 +8,7 @@ var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 
-var editor, preview, converter, cm, menu, file, text;
+var editor, preview, previewVisible, converter, cm, menu, file, text;
 
 var menuTemplate = [
   {
@@ -203,6 +203,8 @@ onload = function() {
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
 
+  previewVisible = false;
+
   converter = new showdown.Converter();
 
   cm = CodeMirror(
@@ -222,7 +224,7 @@ onload = function() {
 
   // re-render Markdown on every CodeMirror change event
   cm.on("change", function(e) {
-    renderMarkdown();
+    if (previewVisible) renderMarkdown();
   });
 
 };
@@ -278,6 +280,7 @@ function setWindowTitle(title) {
 }
 
 function togglePreview() {
+  previewVisible = previewVisible === false ? true : false;
   document.body.classList.toggle('preview-visible');
   renderMarkdown();
 }
