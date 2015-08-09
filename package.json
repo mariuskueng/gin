@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build": "electron-packager ./ Gin --out=dist --overwrite --platform=darwin --arch=x64 --version=0.30.1"
+    "build": "electron-packager ./ Gin --out=dist --overwrite --platform=darwin --arch=x64 --version=0.30.3"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
     "showdown": "^1.2.1"
   },
   "devDependencies": {
-    "electron-prebuilt": "^0.30.1",
+    "electron-prebuilt": "^0.30.3",
     "electron-packager": "^5.0.0"
   }
 }
