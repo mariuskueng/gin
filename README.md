@@ -33,14 +33,15 @@ $ npm start
 ### Package app
 
 ```
-$ npm build
+$ npm run-script build
 ```
 
 ## Improvements
 
-- [ ] Format with key-bindings
-- [ ] Open a new file
+- [x] Format with key-bindings
+- [x] Open a new file
 - [ ] Export HTML
 - [ ] Themes/Fonts
-- [ ] Open links in separate browser window
+- [x] Open links in separate browser window
 - [ ] Settings (stored)
+- [ ] Refactor everything 😃

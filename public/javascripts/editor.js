@@ -3,11 +3,12 @@ var app = remote.require('app');
 var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
+var shell = remote.require('shell');
 var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 
-var editor, preview, converter, cm, menu, file, text;
+var editor, preview, previewVisible, converter, cm, menu, file, text;
 
 var menuTemplate = [
   {
@@ -15,6 +16,9 @@ var menuTemplate = [
     submenu: [
       {
         label: 'About Gin',
+        click: function() {
+          shell.openExternal('https://github.com/mariuskueng/gin');
+        }
       },
       {
         label: 'Preferences...',
@@ -30,6 +34,15 @@ var menuTemplate = [
   {
     label: 'File',
     submenu: [
+      {
+        label: 'New File',
+        accelerator: 'Cmd+N',
+        click: function() {
+          console.log('New file');
+          console.warn('Careful, same instance');
+          window.open('file://' + __dirname + '/index.html');
+        }
+      },
       {
         label: 'Open File',
         accelerator: 'Cmd+O',
@@ -56,23 +69,121 @@ var menuTemplate = [
     ]
   },
   {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'Cmd+Z',
+        click: function() {
+          cm.execCommand("undo");
+        }
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Shift+Cmd+Z',
+        click: function() {
+          cm.execCommand("redo");
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Cut',
+        accelerator: 'Cmd+X',
+        click: function() {
+          clipboard.writeText(cm.getSelection());
+          cm.replaceSelection('');
+        }
+      },
+      {
+        label: 'Copy',
+        accelerator: 'Cmd+C',
+        click: function() {
+          clipboard.writeText(cm.getSelection());
+        }
+      },
+      {
+        label: 'Paste',
+        accelerator: 'Cmd+V',
+        click: function() {
+          cm.replaceSelection(clipboard.readText());
+        }
+      },
+      {
+        label: 'Select All',
+        accelerator: 'Cmd+A',
+        click: function() {
+          cm.execCommand("selectAll");
+        }
+      }
+    ]
+  },
+  {
     label: 'Format',
     submenu: [
       {
         label: 'Link',
         accelerator: 'Cmd+K',
+        click: function() {
+          var text = cm.getSelection();
+          var cursor;
+          if (text === '') {
+            cm.replaceSelection("[]()");
+            cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
+          } else {
+            text = "[" + cm.getSelection() + "]()";
+            cm.replaceSelection(text);
+            cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+          }
+        }
       },
       {
         label: 'Bold',
         accelerator: 'Cmd+B',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("****");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+          } else {
+            text = "**" + cm.getSelection() + "**";
+            cm.replaceSelection(text);
+          }
+        }
       },
       {
         label: 'Italic',
         accelerator: 'Cmd+I',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("**");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+          } else {
+            text = "*" + cm.getSelection() + "*";
+            cm.replaceSelection(text);
+          }
+        }
       },
       {
         label: 'Underline',
         accelerator: 'Cmd+U',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("__");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+          } else {
+            text = "_" + cm.getSelection() + "_";
+            cm.replaceSelection(text);
+          }
+        }
       }
     ]
   },
@@ -98,8 +209,18 @@ onload = function() {
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
 
-  converter = new showdown.Converter();
+  previewVisible = false;
 
+  // showdown constructor
+  converter = new showdown.Converter({
+    strikethrough: true,
+    tables: true,
+    ghCodeBlocks: true,
+    tasklists: true,
+    smoothLivePreview: true
+  });
+
+  // CodeMirror constructor
   cm = CodeMirror(
     editor,
     {
@@ -111,30 +232,13 @@ onload = function() {
       tabSize: 2,
       viewportMargin: Infinity,
       autofocus: true,
-      theme: "gin",
-      // value: "# This is some Markdown \nIt's **awesome**.\n",
-      extraKeys: {
-        "Cmd-S": function(instance) {
-          writeFile();
-        },
-        "Cmd-V": function(instance) {
-          console.log('paste');
-          instance.replaceSelection(clipboard.readText());
-
-        },
-        "Cmd-C": function(instance) {
-          console.log('copy');
-          clipboard.writeText(cm.getSelection());
-        }
-      }
+      theme: "gin"
     }
   );
 
-  setWindowTitle('Untitled');
-
   // re-render Markdown on every CodeMirror change event
   cm.on("change", function(e) {
-    renderMarkdown();
+    if (previewVisible) renderMarkdown();
   });
 
 };
@@ -190,10 +294,21 @@ function setWindowTitle(title) {
 }
 
 function togglePreview() {
+  previewVisible = previewVisible === false ? true : false;
   document.body.classList.toggle('preview-visible');
   renderMarkdown();
 }
 
 function renderMarkdown() {
   preview.innerHTML = converter.makeHtml(cm.getValue());
+
+  var links = document.querySelectorAll('#preview a');
+  for (var i = 0; i < links.length; i++) {
+    links[i].addEventListener('click', clickLinkEvent);
+  }
+}
+
+function clickLinkEvent(e) {
+  e.preventDefault();
+  shell.openExternal(e.srcElement.href);
 }
