@@ -104,32 +104,60 @@ var menuTemplate = [
         label: 'Link',
         accelerator: 'Cmd+K',
         click: function() {
-          var text = "[" + cm.getSelection() + "]()";
-          cm.replaceSelection(text);
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("[]()");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line , ch : cursor.ch - 3 });
+          } else {
+            text = "[" + cm.getSelection() + "]()";
+            cm.replaceSelection(text);
+          }
         }
       },
       {
         label: 'Bold',
         accelerator: 'Cmd+B',
         click: function() {
-          var text = "**" + cm.getSelection() + "**";
-          cm.replaceSelection(text);
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("****");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line , ch : cursor.ch - 2 });
+          } else {
+            text = "**" + cm.getSelection() + "**";
+            cm.replaceSelection(text);
+          }
         }
       },
       {
         label: 'Italic',
         accelerator: 'Cmd+I',
         click: function() {
-          var text = "*" + cm.getSelection() + "*";
-          cm.replaceSelection(text);
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("**");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line , ch : cursor.ch - 1 });
+          } else {
+            text = "*" + cm.getSelection() + "*";
+            cm.replaceSelection(text);
+          }
         }
       },
       {
         label: 'Underline',
         accelerator: 'Cmd+U',
         click: function() {
-          var text = "_" + cm.getSelection() + "_";
-          cm.replaceSelection(text);
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("__");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line , ch : cursor.ch - 1 });
+          } else {
+            text = "_" + cm.getSelection() + "_";
+            cm.replaceSelection(text);
+          }
         }
       }
     ]
