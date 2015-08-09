@@ -39,7 +39,7 @@ $ npm run-script build
 ## Improvements
 
 - [x] Format with key-bindings
-- [ ] Open a new file
+- [x] Open a new file
 - [ ] Export HTML
 - [ ] Themes/Fonts
 - [x] Open links in separate browser window
