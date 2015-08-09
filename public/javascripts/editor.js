@@ -284,4 +284,14 @@ function togglePreview() {
 
 function renderMarkdown() {
   preview.innerHTML = converter.makeHtml(cm.getValue());
+
+  var links = document.querySelectorAll('#preview a');
+  for (var i = 0; i < links.length; i++) {
+    links[i].addEventListener('click', clickLinkEvent);
+  }
+}
+
+function clickLinkEvent(e) {
+  e.preventDefault();
+  shell.openExternal(e.srcElement.href);
 }
