@@ -42,6 +42,6 @@ $ npm run-script build
 - [ ] Open a new file
 - [ ] Export HTML
 - [ ] Themes/Fonts
-- [ ] Open links in separate browser window
+- [x] Open links in separate browser window
 - [ ] Settings (stored)
 - [ ] Refactor everything 😃
