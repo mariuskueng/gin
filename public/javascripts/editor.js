@@ -3,6 +3,7 @@ var app = remote.require('app');
 var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
+var shell = remote.require('shell');
 var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
@@ -15,6 +16,9 @@ var menuTemplate = [
     submenu: [
       {
         label: 'About Gin',
+        click: function() {
+          shell.openExternal('https://github.com/mariuskueng/gin');
+        }
       },
       {
         label: 'Preferences...',
