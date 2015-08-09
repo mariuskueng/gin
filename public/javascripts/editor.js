@@ -112,13 +112,16 @@ var menuTemplate = [
         accelerator: 'Cmd+K',
         click: function() {
           var text = cm.getSelection();
+          var cursor;
           if (text === '') {
             cm.replaceSelection("[]()");
-            var cursor = cm.getCursor();
+            cursor = cm.getCursor();
             cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
           } else {
             text = "[" + cm.getSelection() + "]()";
             cm.replaceSelection(text);
+            cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
           }
         }
       },
