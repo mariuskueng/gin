@@ -190,6 +190,13 @@ var menuTemplate = [
     label: 'View',
     submenu: [
       {
+        label: 'Toggle Status Bar',
+        accelerator: 'Cmd+/',
+        click: function() {
+          toggleStatusBar();
+        }
+      },
+      {
         label: 'Toggle Preview',
         accelerator: 'Alt+Cmd+P',
         click: function() {
@@ -209,7 +216,7 @@ onload = function() {
   preview = document.getElementById("preview");
 
   previewVisible = false;
-  statusbarVisible = true;
+  statusbarVisible = false;
 
   // showdown constructor
   converter = new showdown.Converter({
@@ -244,7 +251,7 @@ onload = function() {
   // re-render Markdown on every CodeMirror change event
   cm.on("change", function(e) {
     if (previewVisible) renderMarkdown();
-    if (statusbarVisible) renderStatusValues();
+    if (statusbarVisible) renderStatusBarValues();
   });
 
   app.on('open-file', function(event, path) {
@@ -314,6 +321,12 @@ function togglePreview() {
   renderMarkdown();
 }
 
+function toggleStatusBar() {
+  statusbarVisible = statusbarVisible === false ? true : false;
+  document.body.classList.toggle('statusbar-visible');
+  renderStatusBarValues();
+}
+
 function renderMarkdown() {
   preview.innerHTML = converter.makeHtml(cm.getValue());
 
@@ -351,7 +364,7 @@ function countCharacters() {
 
   if (cm.getValue()) charsCount = cm.getValue().length;
 
-  statusChars.innerHTML = getStatusBarText(charsCount, 'characters');
+  statusChars.innerHTML = getStatusBarText(charsCount, 'character');
 
   return charsCount;
 }
@@ -377,7 +390,7 @@ function setReadingDuration(wordsCount) {
   return time;
 }
 
-function renderStatusValues() {
+function renderStatusBarValues() {
   var wordsCount = countWords();
   countCharacters();
   setReadingDuration(wordsCount);

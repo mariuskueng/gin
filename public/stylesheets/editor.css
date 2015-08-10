@@ -47,6 +47,7 @@ body.preview-visible #editor .CodeMirror-scroll {
   border-top: 1px solid #d5d5d5;
   bottom: 0;
   color: #676767;
+  display: none;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 11px;
   left: 0;
@@ -56,6 +57,10 @@ body.preview-visible #editor .CodeMirror-scroll {
   right: 0;
   width: 100%;
   z-index: 1000;
+}
+
+body.statusbar-visible #statusbar {
+  display: block;
 }
 
 #statusbar p {
