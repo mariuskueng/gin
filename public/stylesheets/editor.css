@@ -55,6 +55,7 @@ body.preview-visible #editor .CodeMirror-scroll {
   position: fixed;
   right: 0;
   width: 100%;
+  z-index: 1000;
 }
 
 #statusbar p {
@@ -71,7 +72,7 @@ body.preview-visible #editor .CodeMirror-scroll {
   margin-left: 15px;
 }
 
-.status-length {
+.status-duration {
   float: right;
   margin-right: 10px;;
 }
