@@ -228,7 +228,8 @@ onload = function() {
         highlightFormatting: true
       },
       lineWrapping: true,
-      tabSize: 2,
+      tabSize: 4,
+      indentUnit: 4,
       viewportMargin: Infinity,
       autofocus: true,
       theme: "gin"
