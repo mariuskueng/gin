@@ -8,7 +8,7 @@ var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 
-var editor, preview, previewVisible, converter, cm, menu, file, text;
+var editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text;
 
 var menuTemplate = [
   {
@@ -209,6 +209,7 @@ onload = function() {
   preview = document.getElementById("preview");
 
   previewVisible = false;
+  statusbarVisible = true;
 
   // showdown constructor
   converter = new showdown.Converter({
@@ -243,6 +244,7 @@ onload = function() {
   // re-render Markdown on every CodeMirror change event
   cm.on("change", function(e) {
     if (previewVisible) renderMarkdown();
+    if (statusbarVisible) renderStatusValues();
   });
 
   app.on('open-file', function(event, path) {
@@ -324,4 +326,20 @@ function renderMarkdown() {
 function clickLinkEvent(e) {
   e.preventDefault();
   shell.openExternal(e.srcElement.href);
+}
+
+function countWords() {
+  var statusWords = document.querySelector('.status-words');
+  var wordsCount = 0;
+
+  if (cm.getValue()) wordsCount = cm.getValue().split(' ').length;
+
+  var text = wordsCount + ' word';
+  if (wordsCount > 1 || wordsCount < 1) text += 's';
+
+  statusWords.innerHTML = text;
+}
+
+function renderStatusValues() {
+  countWords();
 }
