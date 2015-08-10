@@ -232,7 +232,11 @@ onload = function() {
       indentUnit: 4,
       viewportMargin: Infinity,
       autofocus: true,
-      theme: "gin"
+      theme: "gin",
+      extraKeys: { // addons
+        "Enter": "newlineAndIndentContinueMarkdownList"
+      },
+      autoCloseBrackets: true
     }
   );
 
