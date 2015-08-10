@@ -106,7 +106,12 @@ var menuTemplate = [
         label: 'Paste',
         accelerator: 'Cmd+V',
         click: function() {
-          cm.replaceSelection(clipboard.readText(), 'copy');
+          var clipboardText = clipboard.readText();
+          var pastedLines = clipboardText.split('\n').length;
+          var pastedChars = clipboardText.length;
+
+          cm.replaceSelection(clipboardText, 'copy');
+          cm.setCursor(cm.getCursor().line + pastedLines, cm.getCursor().ch + pastedChars);
         }
       },
       {
