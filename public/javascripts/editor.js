@@ -91,7 +91,7 @@ var menuTemplate = [
         label: 'Cut',
         accelerator: 'Cmd+X',
         click: function() {
-          clipboard.writeText(cm.getSelection());
+          clipboard.writeText(cm.getSelection(), 'copy');
           cm.replaceSelection('');
         }
       },
@@ -99,14 +99,14 @@ var menuTemplate = [
         label: 'Copy',
         accelerator: 'Cmd+C',
         click: function() {
-          clipboard.writeText(cm.getSelection());
+          clipboard.writeText(cm.getSelection(), 'copy');
         }
       },
       {
         label: 'Paste',
         accelerator: 'Cmd+V',
         click: function() {
-          cm.replaceSelection(clipboard.readText());
+          cm.replaceSelection(clipboard.readText(), 'copy');
         }
       },
       {
