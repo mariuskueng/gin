@@ -220,6 +220,14 @@ onload = function() {
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
 
+  file = {
+    name: '',
+    path: '',
+    text: '',
+    unsaved: true,
+    changed: false
+  };
+
   previewVisible = false;
   statusbarVisible = false;
 
@@ -269,12 +277,12 @@ function readFile(newFile) {
   if (newFile) {
     fs.readFile(newFile, 'utf8', function(err, data) {
       if (err) throw err;
-      file = newFile;
-      text = data;
-      cm.setValue(text);
-      setWindowTitle(file);
+      file.path = newFile;
+      file.text = data;
+      cm.setValue(file.text);
+      setWindowTitle(file.path);
       // Add file to recent docs in osx dock
-      app.addRecentDocument(file);
+      app.addRecentDocument(file.path);
       console.log('Read a file.');
     });
   } else {
@@ -283,9 +291,9 @@ function readFile(newFile) {
 }
 
 function writeFile(callback) {
-  if (file) {
-    text = cm.getValue();
-    fs.writeFile(file, cm.getValue(), 'utf8', function() {
+  if (file.path) {
+    file.text = cm.getValue();
+    fs.writeFile(file.path, file.text, 'utf8', function() {
       console.log('Wrote a file.');
     });
   } else {
@@ -301,10 +309,10 @@ function createFile() {
     ]}, function (fileName) {
       if (fileName === undefined) return;
 
-      file = fileName;
+      file.path = fileName;
       writeFile(function (err){
         if (err === undefined) {
-          setWindowTitle(file);
+          setWindowTitle(file.path);
         } else {
           dialog.showErrorBox("File Save Error", err.message);
         }
@@ -316,8 +324,9 @@ function setWindowTitle(title) {
   if (title.indexOf('/') > -1) {
     var titleParts = title.split('/');
     title = titleParts[titleParts.length - 1];
+    file.name = title;
   }
-  BrowserWindow.getFocusedWindow().setTitle(title);
+  BrowserWindow.getFocusedWindow().setTitle(file.name);
 }
 
 function togglePreview() {
