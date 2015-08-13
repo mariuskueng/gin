@@ -8,7 +8,7 @@ var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 
-var editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text;
+var editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
 
 var menuTemplate = [
   {
@@ -408,4 +408,11 @@ function renderStatusBarValues() {
   var wordsCount = countWords();
   countCharacters();
   setReadingDuration(wordsCount);
+}
+
+function readSettings(settingsFile) {
+  fs.readFile(settingsFile, 'utf8', function(err, data) {
+    if (err) throw err;
+    settings = data;
+  });
 }
