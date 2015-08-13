@@ -10,11 +10,30 @@
   <body>
     <div id="editor"></div>
     <div id="preview"></div>
+    <div id="statusbar">
+      <div class="status-words">
+        <p>
+          0 words
+        </p>
+      </div>
+      <div class="status-chars">
+        <p>
+          0 characters
+        </p>
+      </div>
+      <div class="status-duration">
+        <p>
+          0 seconds
+        </p>
+      </div>
+    </div>
 
     <script type="text/javascript" src="bower_components/codemirror/lib/codemirror.js"></script>
     <script type="text/javascript" src="bower_components/codemirror/addon/mode/overlay.js"></script>
     <script type="text/javascript" src="bower_components/codemirror/mode/markdown/markdown.js"></script>
     <script type="text/javascript" src="bower_components/codemirror/mode/gfm/gfm.js"></script>
+    <script type="text/javascript" src="bower_components/codemirror/addon/edit/closebrackets.js"></script>
+    <script type="text/javascript" src="bower_components/codemirror/addon/edit/continuelist.js"></script>
     <script type="text/javascript" src="public/javascripts/editor.js"></script>
   </body>
 </html>

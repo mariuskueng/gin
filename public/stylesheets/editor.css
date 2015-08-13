@@ -41,3 +41,43 @@ body.preview-visible #editor .CodeMirror-scroll {
     width: 100%;
   }
 }
+
+#statusbar {
+  background-color: #FFF;
+  border-top: 1px solid #d5d5d5;
+  bottom: 0;
+  color: #676767;
+  display: none;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  left: 0;
+  height: 17px;
+  padding-top: 3px;
+  position: fixed;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+body.statusbar-visible #statusbar {
+  display: block;
+}
+
+#statusbar p {
+  margin: 0;
+}
+
+.status-words {
+  float: left;
+  margin-left: 10px;
+}
+
+.status-chars {
+  float: left;
+  margin-left: 15px;
+}
+
+.status-duration {
+  float: right;
+  margin-right: 10px;;
+}
