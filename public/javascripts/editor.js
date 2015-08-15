@@ -426,7 +426,10 @@ function renderStatusBarValues() {
 
 function readSettings(settingsFile) {
   fs.readFile(settingsFile, 'utf8', function(err, data) {
-    if (err) throw err;
-     settings = JSON.parse(data);
+    if (data === undefined) {
+      settings = {};
+    } else {
+      settings = JSON.parse(data);
+    }
   });
 }

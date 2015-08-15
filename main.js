@@ -25,8 +25,11 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // read settings for window size
   fs.readFile(settingsFile, 'utf8', function(err, data) {
-    if (err) throw err;
-    settings = JSON.parse(data);
+    if (data === undefined) {
+      settings = {};
+    } else {
+      settings = JSON.parse(data);
+    }
 
     // Create the browser window.
     mainWindow = new BrowserWindow({
