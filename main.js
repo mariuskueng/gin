@@ -1,5 +1,6 @@
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
+var fs = require('fs');
 
 // Report crashes to our server.
 require('crash-reporter').start();
@@ -7,6 +8,8 @@ require('crash-reporter').start();
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
 var mainWindow = null;
+var settings = null;
+var settingsFile = __dirname + '/public/assets/settings.json';
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function() {
@@ -20,24 +23,41 @@ app.on('window-all-closed', function() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    'min-width': 460
-  });
+  // read settings for window size
+  fs.readFile(settingsFile, 'utf8', function(err, data) {
+    if (err) throw err;
+    settings = JSON.parse(data);
 
-  // and load the index.html of the app.
-  mainWindow.loadUrl('file://' + __dirname + '/index.html');
+    // Create the browser window.
+    mainWindow = new BrowserWindow({
+      width: settings.width ? settings.width : 800,
+      height: settings.height ? settings.height : 600,
+      'min-width': 460
+    });
 
-  // Open the devtools.
-  // mainWindow.openDevTools();
+    // and load the index.html of the app.
+    mainWindow.loadUrl('file://' + __dirname + '/index.html');
 
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function() {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    mainWindow = null;
+    // Open the devtools.
+    // mainWindow.openDevTools();
+
+    // Emitted when the window is closed.
+    mainWindow.on('closed', function() {
+      // Dereference the window object, usually you would store windows
+      // in an array if your app supports multi windows, this is the time
+      // when you should delete the corresponding element.
+      mainWindow = null;
+    });
+
+    mainWindow.on('resize', function() {
+      var windowSize = mainWindow.getSize();
+      settings.width = windowSize[0];
+      settings.height = windowSize[1];
+
+      // save current window size to settings
+      fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function() {
+        // do something
+      });
+    });
   });
 });
