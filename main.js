@@ -1,5 +1,6 @@
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
+var ipc = require('ipc');
 var fs = require('fs');
 
 // Report crashes to our server.
@@ -63,4 +64,19 @@ app.on('ready', function() {
       settings.height = windowSize[1];
     });
   });
+});
+
+ipc.on('new-file', function() {
+  var w = new BrowserWindow({
+    width: settings.width ? settings.width : 800,
+    height: settings.height ? settings.height : 600,
+    'min-width': 460
+  });
+
+  w.setPosition(
+    BrowserWindow.getFocusedWindow().getPosition()[0] + 25,
+    BrowserWindow.getFocusedWindow().getPosition()[1] + 25
+  );
+
+  w.loadUrl('file://' + __dirname + '/index.html');
 });

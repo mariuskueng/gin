@@ -1,5 +1,6 @@
 var remote = require('remote');
 var app = remote.require('app');
+var ipc = require('ipc');
 var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
@@ -41,15 +42,7 @@ var menuTemplate = [
           console.log('New file');
           console.warn('Careful, same instance');
 
-          var w = new BrowserWindow({
-            width: settings.width ? settings.width : 800,
-            height: settings.height ? settings.height : 600,
-            'min-width': 460
-          });
-
-          w.setPosition(win.getPosition()[0] + 25, win.getPosition()[1] + 25);
-
-          w.loadUrl('file://' + __dirname + '/index.html');
+          ipc.send('new-file');
         }
       },
       {
