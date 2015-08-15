@@ -3,3 +3,5 @@ bower_components/
 dist/
 
 *npm-debug.log
+
+public/assets/settings.json

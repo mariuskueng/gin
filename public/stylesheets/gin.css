@@ -6,6 +6,10 @@
   line-height: 1.5;
 }
 
+.cm-comment {
+  color: #808080;
+}
+
 .cm-variable-2 {
   color: #2ca997;
 }

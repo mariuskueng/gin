@@ -1,0 +1,9 @@
+#editor,
+#statusbar {
+  display: none;
+}
+
+#preview {
+  position: static;
+  border: none;
+}

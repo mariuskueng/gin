@@ -1,5 +1,6 @@
 var remote = require('remote');
 var app = remote.require('app');
+var ipc = require('ipc');
 var BrowserWindow = remote.require('browser-window');
 var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
@@ -8,7 +9,7 @@ var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 
-var editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text;
+var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
 
 var menuTemplate = [
   {
@@ -40,15 +41,16 @@ var menuTemplate = [
         click: function() {
           console.log('New file');
           console.warn('Careful, same instance');
-          window.open('file://' + __dirname + '/index.html');
+
+          ipc.send('new-file');
         }
       },
       {
-        label: 'Open File',
+        label: 'Open File...',
         accelerator: 'Cmd+O',
         click: function() {
           var properties = ['multiSelections', 'createDirectory', 'openFile'];
-          var parentWindow = (process.platform == 'darwin') ? null : BrowserWindow.getFocusedWindow();
+          var parentWindow = (process.platform == 'darwin') ? null : win;
 
           dialog.showOpenDialog(parentWindow, properties, function(f) {
             console.log("got a file: " + f);
@@ -59,10 +61,22 @@ var menuTemplate = [
         }
       },
       {
-        label: 'Save File',
+        label: 'Save File...',
         accelerator: 'Cmd+S',
         click: function() {
           writeFile();
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Print...',
+        accelerator: 'Cmd+P',
+        click: function() {
+          togglePreview();
+          win.print();
+          togglePreview();
         }
       }
     ]
@@ -188,6 +202,35 @@ var menuTemplate = [
             cm.replaceSelection(text);
           }
         }
+      },
+      {
+        label: 'Strikethrough',
+        accelerator: 'Cmd+Shift+T',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("~~~~");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+          } else {
+            text = "~~" + cm.getSelection() + "~~";
+            cm.replaceSelection(text);
+          }
+        }
+      },
+      {
+        label: 'Inline Code',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("``");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+          } else {
+            text = "`" + cm.getSelection() + "`";
+            cm.replaceSelection(text);
+          }
+        }
       }
     ]
   },
@@ -217,6 +260,7 @@ menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
 
 onload = function() {
+  win = BrowserWindow.getFocusedWindow();
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
 
@@ -271,6 +315,7 @@ onload = function() {
     readFile(path);
   });
 
+  readSettings(__dirname + '/public/assets/settings.json');
 };
 
 function readFile(newFile) {
@@ -326,7 +371,7 @@ function setWindowTitle(title) {
     title = titleParts[titleParts.length - 1];
     file.name = title;
   }
-  BrowserWindow.getFocusedWindow().setTitle(file.name);
+  win.setTitle(file.name);
 }
 
 function togglePreview() {
@@ -408,4 +453,14 @@ function renderStatusBarValues() {
   var wordsCount = countWords();
   countCharacters();
   setReadingDuration(wordsCount);
+}
+
+function readSettings(settingsFile) {
+  fs.readFile(settingsFile, 'utf8', function(err, data) {
+    if (data === undefined) {
+      settings = {};
+    } else {
+      settings = JSON.parse(data);
+    }
+  });
 }
