@@ -47,17 +47,17 @@ app.on('ready', function() {
       // in an array if your app supports multi windows, this is the time
       // when you should delete the corresponding element.
       mainWindow = null;
+
+      // save current window size to settings
+      fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function() {
+        // do something
+      });
     });
 
     mainWindow.on('resize', function() {
       var windowSize = mainWindow.getSize();
       settings.width = windowSize[0];
       settings.height = windowSize[1];
-
-      // save current window size to settings
-      fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function() {
-        // do something
-      });
     });
   });
 });
