@@ -202,6 +202,35 @@ var menuTemplate = [
             cm.replaceSelection(text);
           }
         }
+      },
+      {
+        label: 'Strikethrough',
+        accelerator: 'Cmd+Shift+T',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("~~~~");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+          } else {
+            text = "~~" + cm.getSelection() + "~~";
+            cm.replaceSelection(text);
+          }
+        }
+      },
+      {
+        label: 'Inline Code',
+        click: function() {
+          var text = cm.getSelection();
+          if (text === '') {
+            cm.replaceSelection("``");
+            var cursor = cm.getCursor();
+            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+          } else {
+            text = "`" + cm.getSelection() + "`";
+            cm.replaceSelection(text);
+          }
+        }
       }
     ]
   },
