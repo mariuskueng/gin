@@ -69,9 +69,12 @@ var menuTemplate = [
         type: 'separator'
       },
       {
-        label: 'Print PDF...',
+        label: 'Print...',
+        accelerator: 'Cmd+P',
         click: function() {
+          togglePreview();
           win.print();
+          togglePreview();
         }
       }
     ]
