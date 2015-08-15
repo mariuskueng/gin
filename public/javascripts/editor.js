@@ -40,7 +40,16 @@ var menuTemplate = [
         click: function() {
           console.log('New file');
           console.warn('Careful, same instance');
-          window.open('file://' + __dirname + '/index.html');
+
+          var w = new BrowserWindow({
+            width: settings.width ? settings.width : 800,
+            height: settings.height ? settings.height : 600,
+            'min-width': 460
+          });
+
+          w.setPosition(win.getPosition()[0] + 25, win.getPosition()[1] + 25);
+
+          w.loadUrl('file://' + __dirname + '/index.html');
         }
       },
       {
