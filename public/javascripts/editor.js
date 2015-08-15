@@ -271,6 +271,7 @@ onload = function() {
     readFile(path);
   });
 
+  readSettings(__dirname + '/public/assets/settings.json');
 };
 
 function readFile(newFile) {
@@ -413,6 +414,6 @@ function renderStatusBarValues() {
 function readSettings(settingsFile) {
   fs.readFile(settingsFile, 'utf8', function(err, data) {
     if (err) throw err;
-    settings = data;
+     settings = JSON.parse(data);
   });
 }
