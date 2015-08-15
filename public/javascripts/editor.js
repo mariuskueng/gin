@@ -8,7 +8,7 @@ var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 
-var editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
+var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
 
 var menuTemplate = [
   {
@@ -44,11 +44,11 @@ var menuTemplate = [
         }
       },
       {
-        label: 'Open File',
+        label: 'Open File...',
         accelerator: 'Cmd+O',
         click: function() {
           var properties = ['multiSelections', 'createDirectory', 'openFile'];
-          var parentWindow = (process.platform == 'darwin') ? null : BrowserWindow.getFocusedWindow();
+          var parentWindow = (process.platform == 'darwin') ? null : win;
 
           dialog.showOpenDialog(parentWindow, properties, function(f) {
             console.log("got a file: " + f);
@@ -59,10 +59,19 @@ var menuTemplate = [
         }
       },
       {
-        label: 'Save File',
+        label: 'Save File...',
         accelerator: 'Cmd+S',
         click: function() {
           writeFile();
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Print PDF...',
+        click: function() {
+          win.print();
         }
       }
     ]
@@ -217,6 +226,7 @@ menu = Menu.buildFromTemplate(menuTemplate);
 Menu.setApplicationMenu(menu);
 
 onload = function() {
+  win = BrowserWindow.getFocusedWindow();
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
 
@@ -327,7 +337,7 @@ function setWindowTitle(title) {
     title = titleParts[titleParts.length - 1];
     file.name = title;
   }
-  BrowserWindow.getFocusedWindow().setTitle(file.name);
+  win.setTitle(file.name);
 }
 
 function togglePreview() {
