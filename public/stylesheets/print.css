@@ -4,6 +4,7 @@
 }
 
 #preview {
-  position: static;
   border: none;
+  display: block;
+  position: static;
 }
