@@ -74,9 +74,8 @@ var menuTemplate = [
         label: 'Print...',
         accelerator: 'Cmd+P',
         click: function() {
-          togglePreview();
+          renderMarkdown();
           win.print();
-          togglePreview();
         }
       }
     ]
