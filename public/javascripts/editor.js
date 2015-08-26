@@ -371,7 +371,7 @@ function setWindowTitle(title) {
     title = titleParts[titleParts.length - 1];
     file.name = title;
   }
-  win.setTitle(file.name);
+  BrowserWindow.getFocusedWindow().setTitle(file.name);
 }
 
 function togglePreview() {
