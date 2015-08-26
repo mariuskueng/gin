@@ -29,9 +29,16 @@
   text-decoration: none;
 }
 
+.cm-tag,
+.cm-tag + .cm-string,
+.cm-tag + .cm-string + .cm-url,
+.cm-tag + .cm-string + .cm-string + .cm-string {
+  color: #9d4fc4;
+}
+
 img {
   height: auto;
-  width: 75%;
+  width: 100%;
 }
 
 pre, code {
