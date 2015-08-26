@@ -8,6 +8,7 @@ var shell = remote.require('shell');
 var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
+var path = require('path');
 
 var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
 
@@ -391,6 +392,16 @@ function renderMarkdown() {
   var links = document.querySelectorAll('#preview a');
   for (var i = 0; i < links.length; i++) {
     links[i].addEventListener('click', clickLinkEvent);
+  }
+
+  var images = document.querySelectorAll('#preview img');
+  for (var j = 0; j < images.length; j++) {
+    var imagePath = images[j].getAttribute('src');
+    if (imagePath.indexOf('http') > -1)
+      images[j].setAttribute('src', imagePath);
+    else
+      images[j].setAttribute('src', path.resolve(file.path, '..', imagePath));
+
   }
 }
 
