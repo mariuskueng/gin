@@ -297,6 +297,7 @@ onload = function() {
       indentUnit: 4,
       viewportMargin: Infinity,
       autofocus: true,
+      styleSelectedText: true,
       theme: "gin",
       extraKeys: { // addons
         "Enter": "newlineAndIndentContinueMarkdownList"

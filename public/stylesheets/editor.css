@@ -37,6 +37,10 @@ body.preview-visible #editor .CodeMirror-scroll {
   width: 750px;
 }
 
+.CodeMirror-selected {
+  background-color: #b2d7ff !important;
+}
+
 @media (max-width: 750px) {
   .CodeMirror-scroll {
     width: 100%;
