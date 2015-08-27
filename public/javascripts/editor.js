@@ -71,7 +71,7 @@ onload = function() {
   readSettings(__dirname + '/public/assets/settings.json');
 };
 
-ipc.on('read-file', function(newFile) {
+function readFile(newFile) {
   if (newFile) {
     fs.readFile(newFile, 'utf8', function(err, data) {
       if (err) throw err;
@@ -86,6 +86,10 @@ ipc.on('read-file', function(newFile) {
   } else {
     console.error('No file given');
   }
+}
+
+ipc.on('read-file', function(file) {
+  readFile(file);
 });
 
 function writeFile(callback) {
@@ -100,6 +104,10 @@ function writeFile(callback) {
   }
   if (callback) callback();
 }
+
+ipc.on('write-file', function() {
+  writeFile();
+});
 
 function createFile() {
   dialog.showSaveDialog({ filters: [

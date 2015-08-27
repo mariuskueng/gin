@@ -135,7 +135,8 @@ function newFile() {
           label: 'Save File...',
           accelerator: 'Cmd+S',
           click: function() {
-            writeFile();
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('write-file');
           }
         },
         {
