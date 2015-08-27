@@ -247,17 +247,25 @@ function renderStatusBarValues() {
   setReadingDuration(wordsCount);
 }
 
-function readSettings(settingsFile) {
+function readSettings(callback) {
   var settings = {};
-  var data = fs.readFileSync(settingsFile, 'utf8');
-  if (data !== undefined) {
-    settings = JSON.parse(data);
+  try {
+    var data = fs.readFileSync(settingsFile, 'utf8');
+    if (data !== undefined) {
+      settings = JSON.parse(data);
+    }
+  } catch (e) {
+    console.error(e);
   }
   return settings;
 }
 
 function writeSettings(settings) {
-  fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function(){});
+  try {
+    fs.writeFile(settingsFile, JSON.stringify(settings));
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 ipc.on('write-settings', function(settings) {

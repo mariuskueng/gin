@@ -329,11 +329,14 @@ function newFile() {
 
 function readSettings(callback) {
   var settings = {};
-  var data = fs.readFileSync(settingsFile, 'utf8');
-  if (data !== undefined) {
-    settings = JSON.parse(data);
+  try {
+    var data = fs.readFileSync(settingsFile, 'utf8');
+    if (data !== undefined) {
+      settings = JSON.parse(data);
+    }
+  } catch (e) {
+    console.error(e);
   }
-  console.log(settings);
   return settings;
 }
 
@@ -342,6 +345,9 @@ function writeSettings(settings) {
     settings.width = windowDimensions.width;
     settings.height = windowDimensions.height;
   }
-  console.log(settings);
-  fs.writeFile(settingsFile, JSON.stringify(settings));
+  try {
+    fs.writeFile(settingsFile, JSON.stringify(settings));
+  } catch (e) {
+    console.error(e);
+  }
 }
