@@ -3,6 +3,7 @@ var BrowserWindow = require('browser-window');  // Module to create native brows
 var path = require('path');
 var ipc = require('ipc');
 var fs = require('fs');
+var Menu = require('menu');
 
 // Report crashes to our server.
 require('crash-reporter').start();
@@ -37,11 +38,6 @@ app.on('ready', function() {
   });
 });
 
-// create new file from async call
-ipc.on('new-file', function() {
-  newFile();
-});
-
 function newFile() {
   // Create the browser window.
   var w = new BrowserWindow({
@@ -50,7 +46,234 @@ function newFile() {
     'min-width': 460
   });
 
-  var indexPath = path.resolve(__dirname + '/index.html');
+  var indexPath = 'file://' + __dirname + '/index.html';
+
+  var menuTemplate = [
+    {
+      label: 'Gin',
+      submenu: [
+        {
+          label: 'About Gin',
+          click: function() {
+            shell.openExternal('https://github.com/mariuskueng/gin');
+          }
+        },
+        {
+          label: 'Preferences...',
+          accelerator: 'Cmd+,',
+        },
+        {
+          label: 'Quit',
+          accelerator: 'Cmd+Q',
+          click: function() { app.quit(); }
+        }
+      ]
+    },
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'New File',
+          accelerator: 'Cmd+N',
+          click: function() {
+            console.log('New file');
+            newFile();
+          }
+        },
+        {
+          label: 'Open File...',
+          accelerator: 'Cmd+O',
+          click: function() {
+            var properties = ['multiSelections', 'createDirectory', 'openFile'];
+            var parentWindow = (process.platform == 'darwin') ? null : win;
+
+            dialog.showOpenDialog(parentWindow, properties, function(f) {
+              console.log("got a file: " + f);
+              if (f) {
+                readFile(f[0]);
+              }
+            });
+          }
+        },
+        {
+          label: 'Save File...',
+          accelerator: 'Cmd+S',
+          click: function() {
+            writeFile();
+          }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Print...',
+          accelerator: 'Cmd+P',
+          click: function() {
+            renderMarkdown();
+            win.print();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        {
+          label: 'Undo',
+          accelerator: 'Cmd+Z',
+          click: function() {
+            cm.execCommand("undo");
+          }
+        },
+        {
+          label: 'Redo',
+          accelerator: 'Shift+Cmd+Z',
+          click: function() {
+            cm.execCommand("redo");
+          }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Cut',
+          accelerator: 'Cmd+X',
+          click: function() {
+            clipboard.writeText(cm.getSelection(), 'copy');
+            cm.replaceSelection('');
+          }
+        },
+        {
+          label: 'Copy',
+          accelerator: 'Cmd+C',
+          click: function() {
+            clipboard.writeText(cm.getSelection(), 'copy');
+          }
+        },
+        {
+          label: 'Paste',
+          accelerator: 'Cmd+V',
+          click: function() {
+            var clipboardText = clipboard.readText();
+            var pastedLines = clipboardText.split('\n').length;
+            var pastedChars = clipboardText.length;
+
+            cm.replaceSelection(clipboardText, 'copy');
+            cm.setCursor(cm.getCursor().line + pastedLines, cm.getCursor().ch + pastedChars);
+          }
+        },
+        {
+          label: 'Select All',
+          accelerator: 'Cmd+A',
+          click: function() {
+            cm.execCommand("selectAll");
+          }
+        }
+      ]
+    },
+    {
+      label: 'Format',
+      submenu: [
+        {
+          label: 'Link',
+          accelerator: 'Cmd+K',
+          click: function() {
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('format-link');
+          }
+        },
+        {
+          label: 'Bold',
+          accelerator: 'Cmd+B',
+          click: function() {
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('format-bold');
+          }
+        },
+        {
+          label: 'Italic',
+          accelerator: 'Cmd+I',
+          click: function() {
+            var text = cm.getSelection();
+            if (text === '') {
+              cm.replaceSelection("**");
+              var cursor = cm.getCursor();
+              cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+            } else {
+              text = "*" + cm.getSelection() + "*";
+              cm.replaceSelection(text);
+            }
+          }
+        },
+        {
+          label: 'Underline',
+          accelerator: 'Cmd+U',
+          click: function() {
+            var text = cm.getSelection();
+            if (text === '') {
+              cm.replaceSelection("__");
+              var cursor = cm.getCursor();
+              cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+            } else {
+              text = "_" + cm.getSelection() + "_";
+              cm.replaceSelection(text);
+            }
+          }
+        },
+        {
+          label: 'Strikethrough',
+          accelerator: 'Cmd+Shift+T',
+          click: function() {
+            var text = cm.getSelection();
+            if (text === '') {
+              cm.replaceSelection("~~~~");
+              var cursor = cm.getCursor();
+              cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+            } else {
+              text = "~~" + cm.getSelection() + "~~";
+              cm.replaceSelection(text);
+            }
+          }
+        },
+        {
+          label: 'Inline Code',
+          click: function() {
+            var text = cm.getSelection();
+            if (text === '') {
+              cm.replaceSelection("``");
+              var cursor = cm.getCursor();
+              cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+            } else {
+              text = "`" + cm.getSelection() + "`";
+              cm.replaceSelection(text);
+            }
+          }
+        }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Toggle Status Bar',
+          accelerator: 'Cmd+/',
+          click: function() {
+            toggleStatusBar();
+          }
+        },
+        {
+          label: 'Toggle Preview',
+          accelerator: 'Alt+Cmd+P',
+          click: function() {
+            togglePreview();
+          }
+        }
+      ]
+    }
+  ];
+
+  var menu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(menu);
 
   // and load the index.html of the app.
   w.loadUrl(indexPath);
@@ -73,7 +296,7 @@ function newFile() {
   });
 
   w.on('resize', function() {
-    var windowSize = w.getSize();
+    var windowSize = BrowserWindow.getFocusedWindow().getSize();
     settings.width = windowSize[0];
     settings.height = windowSize[1];
   });

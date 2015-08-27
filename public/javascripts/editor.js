@@ -2,7 +2,6 @@ var remote = require('remote');
 var app = remote.require('app');
 var ipc = require('ipc');
 var BrowserWindow = remote.require('browser-window');
-var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
 var shell = remote.require('shell');
 var fs = require('fs');
@@ -11,253 +10,6 @@ var clipboard = require('clipboard');
 var path = require('path');
 
 var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
-
-var menuTemplate = [
-  {
-    label: 'Gin',
-    submenu: [
-      {
-        label: 'About Gin',
-        click: function() {
-          shell.openExternal('https://github.com/mariuskueng/gin');
-        }
-      },
-      {
-        label: 'Preferences...',
-        accelerator: 'Cmd+,',
-      },
-      {
-        label: 'Quit',
-        accelerator: 'Cmd+Q',
-        click: function() { app.quit(); }
-      }
-    ]
-  },
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'New File',
-        accelerator: 'Cmd+N',
-        click: function() {
-          console.log('New file');
-          console.warn('Careful, same instance');
-
-          ipc.send('new-file');
-        }
-      },
-      {
-        label: 'Open File...',
-        accelerator: 'Cmd+O',
-        click: function() {
-          var properties = ['multiSelections', 'createDirectory', 'openFile'];
-          var parentWindow = (process.platform == 'darwin') ? null : win;
-
-          dialog.showOpenDialog(parentWindow, properties, function(f) {
-            console.log("got a file: " + f);
-            if (f) {
-              readFile(f[0]);
-            }
-          });
-        }
-      },
-      {
-        label: 'Save File...',
-        accelerator: 'Cmd+S',
-        click: function() {
-          writeFile();
-        }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Print...',
-        accelerator: 'Cmd+P',
-        click: function() {
-          renderMarkdown();
-          win.print();
-        }
-      }
-    ]
-  },
-  {
-    label: 'Edit',
-    submenu: [
-      {
-        label: 'Undo',
-        accelerator: 'Cmd+Z',
-        click: function() {
-          cm.execCommand("undo");
-        }
-      },
-      {
-        label: 'Redo',
-        accelerator: 'Shift+Cmd+Z',
-        click: function() {
-          cm.execCommand("redo");
-        }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Cut',
-        accelerator: 'Cmd+X',
-        click: function() {
-          clipboard.writeText(cm.getSelection(), 'copy');
-          cm.replaceSelection('');
-        }
-      },
-      {
-        label: 'Copy',
-        accelerator: 'Cmd+C',
-        click: function() {
-          clipboard.writeText(cm.getSelection(), 'copy');
-        }
-      },
-      {
-        label: 'Paste',
-        accelerator: 'Cmd+V',
-        click: function() {
-          var clipboardText = clipboard.readText();
-          var pastedLines = clipboardText.split('\n').length;
-          var pastedChars = clipboardText.length;
-
-          cm.replaceSelection(clipboardText, 'copy');
-          cm.setCursor(cm.getCursor().line + pastedLines, cm.getCursor().ch + pastedChars);
-        }
-      },
-      {
-        label: 'Select All',
-        accelerator: 'Cmd+A',
-        click: function() {
-          cm.execCommand("selectAll");
-        }
-      }
-    ]
-  },
-  {
-    label: 'Format',
-    submenu: [
-      {
-        label: 'Link',
-        accelerator: 'Cmd+K',
-        click: function() {
-          var text = cm.getSelection();
-          var cursor;
-          if (text === '') {
-            cm.replaceSelection("[]()");
-            cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
-          } else {
-            text = "[" + cm.getSelection() + "]()";
-            cm.replaceSelection(text);
-            cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          }
-        }
-      },
-      {
-        label: 'Bold',
-        accelerator: 'Cmd+B',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("****");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-          } else {
-            text = "**" + cm.getSelection() + "**";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Italic',
-        accelerator: 'Cmd+I',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("**");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          } else {
-            text = "*" + cm.getSelection() + "*";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Underline',
-        accelerator: 'Cmd+U',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("__");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          } else {
-            text = "_" + cm.getSelection() + "_";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Strikethrough',
-        accelerator: 'Cmd+Shift+T',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("~~~~");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-          } else {
-            text = "~~" + cm.getSelection() + "~~";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Inline Code',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("``");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          } else {
-            text = "`" + cm.getSelection() + "`";
-            cm.replaceSelection(text);
-          }
-        }
-      }
-    ]
-  },
-  {
-    label: 'View',
-    submenu: [
-      {
-        label: 'Toggle Status Bar',
-        accelerator: 'Cmd+/',
-        click: function() {
-          toggleStatusBar();
-        }
-      },
-      {
-        label: 'Toggle Preview',
-        accelerator: 'Alt+Cmd+P',
-        click: function() {
-          togglePreview();
-        }
-      }
-    ]
-  }
-];
-
-menu = Menu.buildFromTemplate(menuTemplate);
-
-Menu.setApplicationMenu(menu);
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
@@ -475,3 +227,30 @@ function readSettings(settingsFile) {
     }
   });
 }
+
+ipc.on('format-bold', function() {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection("****");
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+  } else {
+    text = "**" + cm.getSelection() + "**";
+    cm.replaceSelection(text);
+  }
+});
+
+ipc.on('format-link', function() {
+  var text = cm.getSelection();
+  var cursor;
+  if (text === '') {
+    cm.replaceSelection("[]()");
+    cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
+  } else {
+    text = "[" + cm.getSelection() + "]()";
+    cm.replaceSelection(text);
+    cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+  }
+});
