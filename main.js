@@ -1,6 +1,5 @@
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
-var window = require('electron-window');
 var path = require('path');
 var ipc = require('ipc');
 var fs = require('fs');
@@ -45,7 +44,7 @@ ipc.on('new-file', function() {
 
 function newFile() {
   // Create the browser window.
-  var w = window.createWindow({
+  var w = new BrowserWindow({
     width: settings.width ? settings.width : 800,
     height: settings.height ? settings.height : 600,
     'min-width': 460
@@ -54,7 +53,7 @@ function newFile() {
   var indexPath = path.resolve(__dirname + '/index.html');
 
   // and load the index.html of the app.
-  w.showUrl(indexPath);
+  w.loadUrl(indexPath);
 
   // Open the devtools.
   // w.openDevTools();
