@@ -11,7 +11,7 @@ require('crash-reporter').start();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is GCed.
-var settings = null;
+var windowDimensions = {};
 var settingsFile = __dirname + '/public/assets/settings.json';
 
 // Quit when all windows are closed.
@@ -27,16 +27,10 @@ app.on('window-all-closed', function() {
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
   // read settings for window size
-  fs.readFile(settingsFile, 'utf8', function(err, data) {
-    if (data === undefined) {
-      settings = {};
-    } else {
-      settings = JSON.parse(data);
-    }
 
-    // create new file
-    newFile();
-  });
+  var settings = readSettings();
+  // create new file
+  newFile(settings);
 });
 
 app.on('open-file', function(event, path) {
@@ -44,7 +38,7 @@ app.on('open-file', function(event, path) {
   window.webContents.send('read-file', path);
 });
 
-function newFile() {
+function newFile(settings) {
   // Create the browser window.
   var w = new BrowserWindow({
     width: settings.width ? settings.width : 800,
@@ -304,6 +298,10 @@ function newFile() {
   // and load the index.html of the app.
   w.loadUrl(indexPath);
 
+  w.webContents.on("did-finish-load", function() {
+    w.webContents.send('load-settings', settings);
+  });
+
   // Open the devtools.
   // w.openDevTools();
 
@@ -316,14 +314,32 @@ function newFile() {
     w = null;
 
     // save current window size to settings
-    fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function() {
-      // do something
-    });
+    var settings = readSettings();
+    writeSettings(settings);
   });
 
   w.on('resize', function() {
     var windowSize = BrowserWindow.getFocusedWindow().getSize();
-    settings.width = windowSize[0];
-    settings.height = windowSize[1];
+    windowDimensions.width = windowSize[0];
+    windowDimensions.height = windowSize[1];
   });
+}
+
+function readSettings(callback) {
+  var settings = {};
+  var data = fs.readFileSync(settingsFile, 'utf8');
+  if (data !== undefined) {
+    settings = JSON.parse(data);
+  }
+  console.log(settings);
+  return settings;
+}
+
+function writeSettings(settings) {
+  if (windowDimensions) {
+    settings.width = windowDimensions.width;
+    settings.height = windowDimensions.height;
+  }
+  console.log(settings);
+  fs.writeFile(settingsFile, JSON.stringify(settings));
 }
