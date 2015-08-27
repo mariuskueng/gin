@@ -28,9 +28,8 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // read settings for window size
 
-  var settings = readSettings();
   // create new file
-  newFile(settings);
+  newFile();
 });
 
 app.on('open-file', function(event, path) {
@@ -38,7 +37,10 @@ app.on('open-file', function(event, path) {
   window.webContents.send('read-file', path);
 });
 
-function newFile(settings) {
+function newFile() {
+  // Read settings
+  var settings = readSettings();
+
   // Create the browser window.
   var w = new BrowserWindow({
     width: settings.width ? settings.width : 800,
@@ -327,11 +329,14 @@ function newFile(settings) {
 
 function readSettings(callback) {
   var settings = {};
-  var data = fs.readFileSync(settingsFile, 'utf8');
-  if (data !== undefined) {
-    settings = JSON.parse(data);
+  try {
+    var data = fs.readFileSync(settingsFile, 'utf8');
+    if (data !== undefined) {
+      settings = JSON.parse(data);
+    }
+  } catch (e) {
+    console.error(e);
   }
-  console.log(settings);
   return settings;
 }
 
@@ -340,6 +345,9 @@ function writeSettings(settings) {
     settings.width = windowDimensions.width;
     settings.height = windowDimensions.height;
   }
-  console.log(settings);
-  fs.writeFile(settingsFile, JSON.stringify(settings));
+  try {
+    fs.writeFile(settingsFile, JSON.stringify(settings));
+  } catch (e) {
+    console.error(e);
+  }
 }
