@@ -1,5 +1,6 @@
 var app = require('app');  // Module to control application life.
 var BrowserWindow = require('browser-window');  // Module to create native browser window.
+var dialog = require('dialog');
 var path = require('path');
 var ipc = require('ipc');
 var fs = require('fs');
@@ -112,13 +113,20 @@ function newFile() {
           label: 'Open File...',
           accelerator: 'Cmd+O',
           click: function() {
-            var properties = ['multiSelections', 'createDirectory', 'openFile'];
-            var parentWindow = (process.platform == 'darwin') ? null : win;
+            var properties = ['createDirectory', 'openFile'];
+            var window = BrowserWindow.getFocusedWindow();
 
-            dialog.showOpenDialog(parentWindow, properties, function(f) {
-              console.log("got a file: " + f);
-              if (f) {
-                readFile(f[0]);
+            dialog.showOpenDialog(window, {
+              properties: properties,
+              filters: [
+                  { name: 'text', extensions: ['md', 'markdown'] }
+              ]
+            }, function(file) {
+              console.log("got a file: " + file);
+              if (file === undefined) {
+                  return;
+              } else{
+                  window.webContents.send('read-file', file[0]);
               }
             });
           }

@@ -71,7 +71,7 @@ onload = function() {
   readSettings(__dirname + '/public/assets/settings.json');
 };
 
-function readFile(newFile) {
+ipc.on('read-file', function(newFile) {
   if (newFile) {
     fs.readFile(newFile, 'utf8', function(err, data) {
       if (err) throw err;
@@ -86,7 +86,7 @@ function readFile(newFile) {
   } else {
     console.error('No file given');
   }
-}
+});
 
 function writeFile(callback) {
   if (file.path) {
