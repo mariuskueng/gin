@@ -49,7 +49,8 @@ function newFile() {
   var w = new BrowserWindow({
     width: settings.width ? settings.width : 800,
     height: settings.height ? settings.height : 600,
-    'min-width': 460
+    'min-width': 400,
+    'min-height': 200
   });
 
   var indexPath = 'file://' + __dirname + '/index.html';
