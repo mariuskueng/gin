@@ -141,11 +141,19 @@ function togglePreview() {
   renderMarkdown();
 }
 
+ipc.on('toggle-preview', function() {
+  togglePreview();
+});
+
 function toggleStatusBar() {
   statusbarVisible = statusbarVisible === false ? true : false;
   document.body.classList.toggle('statusbar-visible');
   renderStatusBarValues();
 }
+
+ipc.on('toggle-statusbar', function() {
+  toggleStatusBar();
+});
 
 function renderMarkdown() {
   preview.innerHTML = converter.makeHtml(cm.getValue());

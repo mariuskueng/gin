@@ -250,14 +250,16 @@ function newFile() {
           label: 'Toggle Status Bar',
           accelerator: 'Cmd+/',
           click: function() {
-            toggleStatusBar();
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('toggle-statusbar');
           }
         },
         {
           label: 'Toggle Preview',
           accelerator: 'Alt+Cmd+P',
           click: function() {
-            togglePreview();
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('toggle-preview');
           }
         }
       ]
