@@ -194,59 +194,31 @@ function newFile() {
           label: 'Italic',
           accelerator: 'Cmd+I',
           click: function() {
-            var text = cm.getSelection();
-            if (text === '') {
-              cm.replaceSelection("**");
-              var cursor = cm.getCursor();
-              cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-            } else {
-              text = "*" + cm.getSelection() + "*";
-              cm.replaceSelection(text);
-            }
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('format-italic');
           }
         },
         {
           label: 'Underline',
           accelerator: 'Cmd+U',
           click: function() {
-            var text = cm.getSelection();
-            if (text === '') {
-              cm.replaceSelection("__");
-              var cursor = cm.getCursor();
-              cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-            } else {
-              text = "_" + cm.getSelection() + "_";
-              cm.replaceSelection(text);
-            }
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('format-underline');
           }
         },
         {
           label: 'Strikethrough',
           accelerator: 'Cmd+Shift+T',
           click: function() {
-            var text = cm.getSelection();
-            if (text === '') {
-              cm.replaceSelection("~~~~");
-              var cursor = cm.getCursor();
-              cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-            } else {
-              text = "~~" + cm.getSelection() + "~~";
-              cm.replaceSelection(text);
-            }
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('format-strikethrough');
           }
         },
         {
           label: 'Inline Code',
           click: function() {
-            var text = cm.getSelection();
-            if (text === '') {
-              cm.replaceSelection("``");
-              var cursor = cm.getCursor();
-              cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-            } else {
-              text = "`" + cm.getSelection() + "`";
-              cm.replaceSelection(text);
-            }
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('format-inline-code');
           }
         }
       ]
