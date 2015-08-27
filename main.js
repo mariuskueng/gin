@@ -146,8 +146,9 @@ function newFile() {
           label: 'Print...',
           accelerator: 'Cmd+P',
           click: function() {
-            renderMarkdown();
-            win.print();
+            var window = BrowserWindow.getFocusedWindow();
+            window.webContents.send('render-markdown');
+            window.print();
           }
         }
       ]

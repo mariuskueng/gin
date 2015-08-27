@@ -165,6 +165,10 @@ function renderMarkdown() {
   }
 }
 
+ipc.on('render-markdown', function() {
+  renderMarkdown();
+});
+
 function clickLinkEvent(e) {
   e.preventDefault();
   shell.openExternal(e.srcElement.href);
