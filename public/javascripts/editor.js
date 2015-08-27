@@ -9,7 +9,7 @@ var showdown  = require('showdown');
 var clipboard = require('clipboard');
 var path = require('path');
 
-var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
+var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settingsFile;
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
@@ -64,7 +64,7 @@ onload = function() {
     if (statusbarVisible) renderStatusBarValues();
   });
 
-  readSettings(__dirname + '/public/assets/settings.json');
+  settingsFile = __dirname + '/public/assets/settings.json';
 };
 
 function readFile(newFile) {
@@ -131,20 +131,34 @@ function setWindowTitle(title) {
   BrowserWindow.getFocusedWindow().setTitle(file.name);
 }
 
-function togglePreview() {
+function togglePreview(dontSaveSettings) {
   previewVisible = previewVisible === false ? true : false;
   document.body.classList.toggle('preview-visible');
   renderMarkdown();
+
+  // update preview setting
+  if (!dontSaveSettings) {
+    var settings = readSettings(settingsFile);
+    settings.isPreviewVisible = previewVisible;
+    writeSettings(settings);
+  }
 }
 
 ipc.on('toggle-preview', function() {
   togglePreview();
 });
 
-function toggleStatusBar() {
+function toggleStatusBar(dontSaveSettings) {
   statusbarVisible = statusbarVisible === false ? true : false;
   document.body.classList.toggle('statusbar-visible');
   renderStatusBarValues();
+
+  // update statusbar setting
+  if (!dontSaveSettings) {
+    var settings = readSettings(settingsFile);
+    settings.isStatusbarVisible = statusbarVisible;
+    writeSettings(settings);
+  }
 }
 
 ipc.on('toggle-statusbar', function() {
@@ -234,14 +248,21 @@ function renderStatusBarValues() {
 }
 
 function readSettings(settingsFile) {
-  fs.readFile(settingsFile, 'utf8', function(err, data) {
-    if (data === undefined) {
-      settings = {};
-    } else {
-      settings = JSON.parse(data);
-    }
-  });
+  var settings = {};
+  var data = fs.readFileSync(settingsFile, 'utf8');
+  if (data !== undefined) {
+    settings = JSON.parse(data);
+  }
+  return settings;
 }
+
+function writeSettings(settings) {
+  fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function(){});
+}
+
+ipc.on('write-settings', function(settings) {
+  writeSettings(settings);
+});
 
 ipc.on('format-bold', function() {
   var text = cm.getSelection();
@@ -315,5 +336,15 @@ ipc.on('format-inline-code', function() {
   } else {
     text = "`" + cm.getSelection() + "`";
     cm.replaceSelection(text);
+  }
+});
+
+ipc.on('load-settings', function(settings) {
+  if (settings.isPreviewVisible) {
+    // resaving setting is not necessary
+    togglePreview(true);
+  }
+  if (settings.isStatusbarVisible) {
+    toggleStatusBar(true);
   }
 });
