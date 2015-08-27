@@ -2,261 +2,14 @@ var remote = require('remote');
 var app = remote.require('app');
 var ipc = require('ipc');
 var BrowserWindow = remote.require('browser-window');
-var Menu = remote.require('menu');
 var dialog = remote.require('dialog');
 var shell = remote.require('shell');
 var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
+var path = require('path');
 
-var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settings;
-
-var menuTemplate = [
-  {
-    label: 'Gin',
-    submenu: [
-      {
-        label: 'About Gin',
-        click: function() {
-          shell.openExternal('https://github.com/mariuskueng/gin');
-        }
-      },
-      {
-        label: 'Preferences...',
-        accelerator: 'Cmd+,',
-      },
-      {
-        label: 'Quit',
-        accelerator: 'Cmd+Q',
-        click: function() { app.quit(); }
-      }
-    ]
-  },
-  {
-    label: 'File',
-    submenu: [
-      {
-        label: 'New File',
-        accelerator: 'Cmd+N',
-        click: function() {
-          console.log('New file');
-          console.warn('Careful, same instance');
-
-          ipc.send('new-file');
-        }
-      },
-      {
-        label: 'Open File...',
-        accelerator: 'Cmd+O',
-        click: function() {
-          var properties = ['multiSelections', 'createDirectory', 'openFile'];
-          var parentWindow = (process.platform == 'darwin') ? null : win;
-
-          dialog.showOpenDialog(parentWindow, properties, function(f) {
-            console.log("got a file: " + f);
-            if (f) {
-              readFile(f[0]);
-            }
-          });
-        }
-      },
-      {
-        label: 'Save File...',
-        accelerator: 'Cmd+S',
-        click: function() {
-          writeFile();
-        }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Print...',
-        accelerator: 'Cmd+P',
-        click: function() {
-          renderMarkdown();
-          win.print();
-        }
-      }
-    ]
-  },
-  {
-    label: 'Edit',
-    submenu: [
-      {
-        label: 'Undo',
-        accelerator: 'Cmd+Z',
-        click: function() {
-          cm.execCommand("undo");
-        }
-      },
-      {
-        label: 'Redo',
-        accelerator: 'Shift+Cmd+Z',
-        click: function() {
-          cm.execCommand("redo");
-        }
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Cut',
-        accelerator: 'Cmd+X',
-        click: function() {
-          clipboard.writeText(cm.getSelection(), 'copy');
-          cm.replaceSelection('');
-        }
-      },
-      {
-        label: 'Copy',
-        accelerator: 'Cmd+C',
-        click: function() {
-          clipboard.writeText(cm.getSelection(), 'copy');
-        }
-      },
-      {
-        label: 'Paste',
-        accelerator: 'Cmd+V',
-        click: function() {
-          var clipboardText = clipboard.readText();
-          var pastedLines = clipboardText.split('\n').length;
-          var pastedChars = clipboardText.length;
-
-          cm.replaceSelection(clipboardText, 'copy');
-          cm.setCursor(cm.getCursor().line + pastedLines, cm.getCursor().ch + pastedChars);
-        }
-      },
-      {
-        label: 'Select All',
-        accelerator: 'Cmd+A',
-        click: function() {
-          cm.execCommand("selectAll");
-        }
-      }
-    ]
-  },
-  {
-    label: 'Format',
-    submenu: [
-      {
-        label: 'Link',
-        accelerator: 'Cmd+K',
-        click: function() {
-          var text = cm.getSelection();
-          var cursor;
-          if (text === '') {
-            cm.replaceSelection("[]()");
-            cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
-          } else {
-            text = "[" + cm.getSelection() + "]()";
-            cm.replaceSelection(text);
-            cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          }
-        }
-      },
-      {
-        label: 'Bold',
-        accelerator: 'Cmd+B',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("****");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-          } else {
-            text = "**" + cm.getSelection() + "**";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Italic',
-        accelerator: 'Cmd+I',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("**");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          } else {
-            text = "*" + cm.getSelection() + "*";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Underline',
-        accelerator: 'Cmd+U',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("__");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          } else {
-            text = "_" + cm.getSelection() + "_";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Strikethrough',
-        accelerator: 'Cmd+Shift+T',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("~~~~");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-          } else {
-            text = "~~" + cm.getSelection() + "~~";
-            cm.replaceSelection(text);
-          }
-        }
-      },
-      {
-        label: 'Inline Code',
-        click: function() {
-          var text = cm.getSelection();
-          if (text === '') {
-            cm.replaceSelection("``");
-            var cursor = cm.getCursor();
-            cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-          } else {
-            text = "`" + cm.getSelection() + "`";
-            cm.replaceSelection(text);
-          }
-        }
-      }
-    ]
-  },
-  {
-    label: 'View',
-    submenu: [
-      {
-        label: 'Toggle Status Bar',
-        accelerator: 'Cmd+/',
-        click: function() {
-          toggleStatusBar();
-        }
-      },
-      {
-        label: 'Toggle Preview',
-        accelerator: 'Alt+Cmd+P',
-        click: function() {
-          togglePreview();
-        }
-      }
-    ]
-  }
-];
-
-menu = Menu.buildFromTemplate(menuTemplate);
-
-Menu.setApplicationMenu(menu);
+var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settingsFile;
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
@@ -296,6 +49,7 @@ onload = function() {
       indentUnit: 4,
       viewportMargin: Infinity,
       autofocus: true,
+      styleSelectedText: true,
       theme: "gin",
       extraKeys: { // addons
         "Enter": "newlineAndIndentContinueMarkdownList"
@@ -310,11 +64,7 @@ onload = function() {
     if (statusbarVisible) renderStatusBarValues();
   });
 
-  app.on('open-file', function(event, path) {
-    readFile(path);
-  });
-
-  readSettings(__dirname + '/public/assets/settings.json');
+  settingsFile = __dirname + '/public/assets/settings.json';
 };
 
 function readFile(newFile) {
@@ -334,6 +84,10 @@ function readFile(newFile) {
   }
 }
 
+ipc.on('read-file', function(file) {
+  readFile(file);
+});
+
 function writeFile(callback) {
   if (file.path) {
     file.text = cm.getValue();
@@ -346,6 +100,10 @@ function writeFile(callback) {
   }
   if (callback) callback();
 }
+
+ipc.on('write-file', function() {
+  writeFile();
+});
 
 function createFile() {
   dialog.showSaveDialog({ filters: [
@@ -370,20 +128,42 @@ function setWindowTitle(title) {
     title = titleParts[titleParts.length - 1];
     file.name = title;
   }
-  win.setTitle(file.name);
+  BrowserWindow.getFocusedWindow().setTitle(file.name);
 }
 
-function togglePreview() {
+function togglePreview(dontSaveSettings) {
   previewVisible = previewVisible === false ? true : false;
   document.body.classList.toggle('preview-visible');
   renderMarkdown();
+
+  // update preview setting
+  if (!dontSaveSettings) {
+    var settings = readSettings(settingsFile);
+    settings.isPreviewVisible = previewVisible;
+    writeSettings(settings);
+  }
 }
 
-function toggleStatusBar() {
+ipc.on('toggle-preview', function() {
+  togglePreview();
+});
+
+function toggleStatusBar(dontSaveSettings) {
   statusbarVisible = statusbarVisible === false ? true : false;
   document.body.classList.toggle('statusbar-visible');
   renderStatusBarValues();
+
+  // update statusbar setting
+  if (!dontSaveSettings) {
+    var settings = readSettings(settingsFile);
+    settings.isStatusbarVisible = statusbarVisible;
+    writeSettings(settings);
+  }
 }
+
+ipc.on('toggle-statusbar', function() {
+  toggleStatusBar();
+});
 
 function renderMarkdown() {
   preview.innerHTML = converter.makeHtml(cm.getValue());
@@ -392,7 +172,20 @@ function renderMarkdown() {
   for (var i = 0; i < links.length; i++) {
     links[i].addEventListener('click', clickLinkEvent);
   }
+
+  var images = document.querySelectorAll('#preview img');
+  for (var j = 0; j < images.length; j++) {
+    var imagePath = images[j].getAttribute('src');
+    if (imagePath.indexOf('http') > -1)
+      images[j].setAttribute('src', imagePath);
+    else
+      images[j].setAttribute('src', path.resolve(file.path, '..', imagePath));
+  }
 }
+
+ipc.on('render-markdown', function() {
+  renderMarkdown();
+});
 
 function clickLinkEvent(e) {
   e.preventDefault();
@@ -455,11 +248,103 @@ function renderStatusBarValues() {
 }
 
 function readSettings(settingsFile) {
-  fs.readFile(settingsFile, 'utf8', function(err, data) {
-    if (data === undefined) {
-      settings = {};
-    } else {
-      settings = JSON.parse(data);
-    }
-  });
+  var settings = {};
+  var data = fs.readFileSync(settingsFile, 'utf8');
+  if (data !== undefined) {
+    settings = JSON.parse(data);
+  }
+  return settings;
 }
+
+function writeSettings(settings) {
+  fs.writeFile(settingsFile, JSON.stringify(settings), 'utf8', function(){});
+}
+
+ipc.on('write-settings', function(settings) {
+  writeSettings(settings);
+});
+
+ipc.on('format-bold', function() {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection("****");
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+  } else {
+    text = "**" + cm.getSelection() + "**";
+    cm.replaceSelection(text);
+  }
+});
+
+ipc.on('format-link', function() {
+  var text = cm.getSelection();
+  var cursor;
+  if (text === '') {
+    cm.replaceSelection("[]()");
+    cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
+  } else {
+    text = "[" + cm.getSelection() + "]()";
+    cm.replaceSelection(text);
+    cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+  }
+});
+
+ipc.on('format-italic', function() {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection("**");
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+  } else {
+    text = "*" + cm.getSelection() + "*";
+    cm.replaceSelection(text);
+  }
+});
+
+ipc.on('format-underline', function() {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection("__");
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+  } else {
+    text = "_" + cm.getSelection() + "_";
+    cm.replaceSelection(text);
+  }
+});
+
+ipc.on('format-strikethrough', function() {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection("~~~~");
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
+  } else {
+    text = "~~" + cm.getSelection() + "~~";
+    cm.replaceSelection(text);
+  }
+});
+
+ipc.on('format-inline-code', function() {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection("``");
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
+  } else {
+    text = "`" + cm.getSelection() + "`";
+    cm.replaceSelection(text);
+  }
+});
+
+ipc.on('load-settings', function(settings) {
+  if (settings.isPreviewVisible) {
+    // resaving setting is not necessary
+    togglePreview(true);
+  }
+  if (settings.isStatusbarVisible) {
+    toggleStatusBar(true);
+  }
+});

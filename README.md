@@ -7,8 +7,11 @@ It's inspired by [Sam Soffes'](https://github.com/soffes) [Whiskey](http://usewh
 ## Features
 
 - Syntax highlighting
+- Text formatting with key-bindings
 - Preview mode with GFM (GitHub Flavored Markdown)
+- Statusbar with character, word count & reading duration
 - Open and save files
+- Multiple windows/files
 
 ## Development setup
 
@@ -40,8 +43,13 @@ $ npm run-script build
 
 - [x] Format with key-bindings
 - [x] Open a new file
-- [ ] Export HTML
-- [ ] Themes/Fonts
 - [x] Open links in separate browser window
-- [ ] Settings (stored)
+- [x] Settings (file based)
+- [ ] Export as HTML
+- [ ] Themes/Fonts
 - [ ] Refactor everything 😃
+- [ ] Testing!
+
+## License
+
+GPL V2
