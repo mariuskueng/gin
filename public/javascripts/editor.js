@@ -64,10 +64,6 @@ onload = function() {
     if (statusbarVisible) renderStatusBarValues();
   });
 
-  app.on('open-file', function(event, path) {
-    readFile(path);
-  });
-
   readSettings(__dirname + '/public/assets/settings.json');
 };
 

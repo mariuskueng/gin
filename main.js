@@ -39,6 +39,11 @@ app.on('ready', function() {
   });
 });
 
+app.on('open-file', function(event, path) {
+  var window = BrowserWindow.getFocusedWindow();
+  window.webContents.send('read-file', path);
+});
+
 function newFile() {
   // Create the browser window.
   var w = new BrowserWindow({
