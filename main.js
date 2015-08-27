@@ -28,9 +28,8 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // read settings for window size
 
-  var settings = readSettings();
   // create new file
-  newFile(settings);
+  newFile();
 });
 
 app.on('open-file', function(event, path) {
@@ -38,7 +37,10 @@ app.on('open-file', function(event, path) {
   window.webContents.send('read-file', path);
 });
 
-function newFile(settings) {
+function newFile() {
+  // Read settings
+  var settings = readSettings();
+
   // Create the browser window.
   var w = new BrowserWindow({
     width: settings.width ? settings.width : 800,
