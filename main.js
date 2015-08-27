@@ -54,19 +54,47 @@ function newFile() {
       submenu: [
         {
           label: 'About Gin',
-          click: function() {
-            shell.openExternal('https://github.com/mariuskueng/gin');
-          }
+          selector: 'orderFrontStandardAboutPanel:'
+        },
+        {
+          type: 'separator'
         },
         {
           label: 'Preferences...',
           accelerator: 'Cmd+,',
         },
         {
+          type: 'separator'
+        },
+        {
+          label: 'Services',
+          submenu: []
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Hide Electron',
+          accelerator: 'CmdOrCtrl+H',
+          selector: 'hide:'
+        },
+        {
+          label: 'Hide Others',
+          accelerator: 'CmdOrCtrl+Shift+H',
+          selector: 'hideOtherApplications:'
+        },
+        {
+          label: 'Show All',
+          selector: 'unhideAllApplications:'
+        },
+        {
+          type: 'separator'
+        },
+        {
           label: 'Quit',
-          accelerator: 'Cmd+Q',
-          click: function() { app.quit(); }
-        }
+          accelerator: 'CmdOrCtrl+Q',
+          selector: 'terminate:'
+        },
       ]
     },
     {
@@ -223,6 +251,32 @@ function newFile() {
           }
         }
       ]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        {
+          label: 'Minimize',
+          accelerator: 'CmdOrCtrl+M',
+          selector: 'performMiniaturize:'
+        },
+        {
+          label: 'Close',
+          accelerator: 'CmdOrCtrl+W',
+          selector: 'performClose:'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Bring All to Front',
+          selector: 'arrangeInFront:'
+        }
+      ]
+    },
+    {
+      label: 'Help',
+      submenu: []
     }
   ];
 
