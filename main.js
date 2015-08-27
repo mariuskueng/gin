@@ -120,54 +120,36 @@ function newFile() {
       submenu: [
         {
           label: 'Undo',
-          accelerator: 'Cmd+Z',
-          click: function() {
-            cm.execCommand("undo");
-          }
+          accelerator: 'CmdOrCtrl+Z',
+          selector: 'undo:'
         },
         {
           label: 'Redo',
-          accelerator: 'Shift+Cmd+Z',
-          click: function() {
-            cm.execCommand("redo");
-          }
+          accelerator: 'Shift+CmdOrCtrl+Z',
+          selector: 'redo:'
         },
         {
           type: 'separator'
         },
         {
           label: 'Cut',
-          accelerator: 'Cmd+X',
-          click: function() {
-            clipboard.writeText(cm.getSelection(), 'copy');
-            cm.replaceSelection('');
-          }
+          accelerator: 'CmdOrCtrl+X',
+          selector: 'cut:'
         },
         {
           label: 'Copy',
-          accelerator: 'Cmd+C',
-          click: function() {
-            clipboard.writeText(cm.getSelection(), 'copy');
-          }
+          accelerator: 'CmdOrCtrl+C',
+          selector: 'copy:'
         },
         {
           label: 'Paste',
-          accelerator: 'Cmd+V',
-          click: function() {
-            var clipboardText = clipboard.readText();
-            var pastedLines = clipboardText.split('\n').length;
-            var pastedChars = clipboardText.length;
-
-            cm.replaceSelection(clipboardText, 'copy');
-            cm.setCursor(cm.getCursor().line + pastedLines, cm.getCursor().ch + pastedChars);
-          }
+          accelerator: 'CmdOrCtrl+V',
+          selector: 'paste:'
         },
         {
           label: 'Select All',
-          accelerator: 'Cmd+A',
-          click: function() {
-            cm.execCommand("selectAll");
-          }
+          accelerator: 'CmdOrCtrl+A',
+          selector: 'selectAll:'
         }
       ]
     },
