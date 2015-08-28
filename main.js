@@ -28,7 +28,14 @@ app.on('ready', function() {
 });
 
 app.on('open-file', function(event, path) {
-  newFile(path);
+  setTimeout(function () {
+    if (BrowserWindow.getAllWindows().length === 0)
+      newFile(path);
+    else {
+      var window = BrowserWindow.getFocusedWindow();
+      window.webContents.send('read-file', path);
+    }
+  }, 500);
 });
 
 app.on('activate-with-no-open-windows', function(event) {
