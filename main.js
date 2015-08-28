@@ -9,6 +9,7 @@ var Menu = require('menu');
 // Report crashes to our server.
 require('crash-reporter').start();
 
+var windowSize = {};
 var settingsFile = __dirname + '/public/assets/settings.json';
 
 // Quit when all windows are closed.
@@ -354,6 +355,12 @@ function newFile(passedFile) {
     writeSettings(settings);
   });
 
+  w.on('resize', function() {
+    var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
+    windowSize.width = currentWindowSize[0];
+    windowSize.height = currentWindowSize[1];
+  });
+
   // Emitted when the window is closed.
   w.on('closed', function(e) {
     e.preventDefault();
@@ -378,9 +385,10 @@ function readSettings() {
 }
 
 function writeSettings(settings) {
-  var windowSize = BrowserWindow.getFocusedWindow().getSize();
-  settings.width = windowSize[0];
-  settings.height = windowSize[1];
+  if (windowSize) {
+    settings.width = windowSize.width;
+    settings.height = windowSize.height;
+  }
 
   try {
     fs.writeFile(settingsFile, JSON.stringify(settings));
