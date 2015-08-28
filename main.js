@@ -36,6 +36,10 @@ app.on('open-file', function(event, path) {
   newFile(path);
 });
 
+app.on('activate-with-no-open-windows', function(event) {
+  newFile();
+});
+
 function newFile(passedFile) {
   // Read settings
   var settings = readSettings();
