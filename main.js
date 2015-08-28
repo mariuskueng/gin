@@ -33,23 +33,21 @@ app.on('ready', function() {
 });
 
 app.on('open-file', function(event, path) {
-  var window = BrowserWindow.getFocusedWindow();
-  window.webContents.send('read-file', path);
+  newFile(path);
 });
 
-function newFile() {
+function newFile(passedFile) {
   // Read settings
   var settings = readSettings();
 
   // Create the browser window.
   var w = new BrowserWindow({
+    show: false,
     width: settings.width ? settings.width : 800,
     height: settings.height ? settings.height : 600,
     'min-width': 400,
     'min-height': 200
   });
-
-  var indexPath = 'file://' + __dirname + '/index.html';
 
   var menuTemplate = [
     {
@@ -116,20 +114,18 @@ function newFile() {
           accelerator: 'Cmd+O',
           click: function() {
             var properties = ['createDirectory', 'openFile'];
-            var window = BrowserWindow.getFocusedWindow();
 
-            dialog.showOpenDialog(window, {
+            dialog.showOpenDialog({
               properties: properties,
               filters: [
                   { name: 'text', extensions: ['md', 'markdown'] }
               ]
             }, function(file) {
               console.log("got a file: " + file);
-              if (file === undefined) {
+              if (file === undefined)
                   return;
-              } else{
-                  window.webContents.send('read-file', file[0]);
-              }
+              else
+                newFile(file[0]);
             });
           }
         },
@@ -298,10 +294,17 @@ function newFile() {
   Menu.setApplicationMenu(menu);
 
   // and load the index.html of the app.
+  var indexPath = 'file://' + __dirname + '/index.html';
   w.loadUrl(indexPath);
 
   w.webContents.on("did-finish-load", function() {
     w.webContents.send('load-settings', settings);
+
+    if (passedFile) {
+      w.webContents.send('read-file', passedFile);
+    }
+
+    w.show();
   });
 
   // Open the devtools.
