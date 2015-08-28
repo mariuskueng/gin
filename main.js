@@ -47,6 +47,10 @@ function newFile(passedFile) {
   // Read settings
   var settings = readSettings();
 
+  // set saved window size
+  windowSize.width = settings.width;
+  windowSize.height = settings.height;
+
   // Create the browser window.
   // Keep a global reference of the window object, if you don't, the window will
   // be closed automatically when the JavaScript object is GCed.
