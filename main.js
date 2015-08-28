@@ -259,6 +259,36 @@ function newFile(passedFile) {
             var window = BrowserWindow.getFocusedWindow();
             window.webContents.send('toggle-preview');
           }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Reload',
+          accelerator: 'CmdOrCtrl+R',
+          click: function() {
+            BrowserWindow.getFocusedWindow().reload();
+          }
+        },
+        {
+          label: 'Toggle DevTools',
+          accelerator: 'Alt+CmdOrCtrl+I',
+          click: function() {
+            BrowserWindow.getFocusedWindow().toggleDevTools();
+          }
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Toggle Fullscreen',
+          accelerator: 'Alt+Cmd+F',
+          click: function() {
+            if (BrowserWindow.getFocusedWindow().isFullScreen())
+              BrowserWindow.getFocusedWindow().setFullScreen(false);
+            else
+              BrowserWindow.getFocusedWindow().setFullScreen(true);
+          }
         }
       ]
     },
