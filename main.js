@@ -9,9 +9,7 @@ var Menu = require('menu');
 // Report crashes to our server.
 require('crash-reporter').start();
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is GCed.
-var windowDimensions = {};
+var windowSize = {};
 var settingsFile = __dirname + '/public/assets/settings.json';
 
 // Quit when all windows are closed.
@@ -26,21 +24,36 @@ app.on('window-all-closed', function() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function() {
-  // read settings for window size
-
   // create new file
   newFile();
 });
 
 app.on('open-file', function(event, path) {
-  newFile(path);
+  setTimeout(function () {
+    if (BrowserWindow.getAllWindows().length === 0)
+      newFile(path);
+    else {
+      var window = BrowserWindow.getFocusedWindow();
+      window.webContents.send('read-file', path);
+    }
+  }, 500);
+});
+
+app.on('activate-with-no-open-windows', function(event) {
+  newFile();
 });
 
 function newFile(passedFile) {
   // Read settings
   var settings = readSettings();
 
+  // set saved window size
+  windowSize.width = settings.width;
+  windowSize.height = settings.height;
+
   // Create the browser window.
+  // Keep a global reference of the window object, if you don't, the window will
+  // be closed automatically when the JavaScript object is GCed.
   var w = new BrowserWindow({
     show: false,
     width: settings.width ? settings.width : 800,
@@ -340,6 +353,18 @@ function newFile(passedFile) {
   // Open the devtools.
   // w.openDevTools();
 
+  w.on('close', function(e) {
+    // save current window size to settings
+    var settings = readSettings();
+    writeSettings(settings);
+  });
+
+  w.on('resize', function() {
+    var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
+    windowSize.width = currentWindowSize[0];
+    windowSize.height = currentWindowSize[1];
+  });
+
   // Emitted when the window is closed.
   w.on('closed', function(e) {
     e.preventDefault();
@@ -347,20 +372,10 @@ function newFile(passedFile) {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     w = null;
-
-    // save current window size to settings
-    var settings = readSettings();
-    writeSettings(settings);
-  });
-
-  w.on('resize', function() {
-    var windowSize = BrowserWindow.getFocusedWindow().getSize();
-    windowDimensions.width = windowSize[0];
-    windowDimensions.height = windowSize[1];
   });
 }
 
-function readSettings(callback) {
+function readSettings() {
   var settings = {};
   try {
     var data = fs.readFileSync(settingsFile, 'utf8');
@@ -374,10 +389,11 @@ function readSettings(callback) {
 }
 
 function writeSettings(settings) {
-  if (windowDimensions) {
-    settings.width = windowDimensions.width;
-    settings.height = windowDimensions.height;
+  if (windowSize) {
+    settings.width = windowSize.width;
+    settings.height = windowSize.height;
   }
+
   try {
     fs.writeFile(settingsFile, JSON.stringify(settings));
   } catch (e) {
