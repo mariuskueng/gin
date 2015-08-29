@@ -83,7 +83,7 @@ function newFile(passedFile) {
           type: 'separator'
         },
         {
-          label: 'Hide Electron',
+          label: 'Hide Gin',
           accelerator: 'CmdOrCtrl+H',
           selector: 'hide:'
         },
