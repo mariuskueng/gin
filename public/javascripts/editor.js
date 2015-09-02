@@ -74,6 +74,30 @@ onload = function() {
     if (statusbarVisible) renderStatusBarValues();
   });
 
+  window.onbeforeunload = function(e) {
+    // Unlike usual browsers, in which a string should be returned and the user is
+    // prompted to confirm the page unload, Electron gives developers more options.
+    // Returning empty string or false would prevent the unloading now.
+    // You can also use the dialog API to let the user confirm closing the application.
+    if ((cm.getValue() === "") || (cm.getValue() === file.text)) {
+      console.log('editor text is unchanged');
+      e.returnValue = true;
+    } else {
+      console.log('editor text has changed');
+      // save file and close window
+      if (file.path) {
+        writeFile();
+        e.returnValue = true;
+      } else {
+        e.returnValue = false;
+        // Prompt save dialog
+        createFile(function(e) {
+          BrowserWindow.getFocusedWindow().destroy();
+        });
+      }
+    }
+  };
+
   settingsFile = __dirname + '/public/assets/settings.json';
 };
 
@@ -128,9 +152,8 @@ function createFile(callback) {
         } else {
           dialog.showErrorBox("File Save Error", err.message);
         }
+        if (callback) callback();
       });
-  }, function() {
-    if (callback) callback();
   });
 }
 
