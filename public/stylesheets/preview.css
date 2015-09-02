@@ -25,3 +25,8 @@ body.preview-visible #preview {
 #preview a {
   color: #3496bd;
 }
+
+#preview pre,
+#preview code {
+  font-family: Courier, monospace;
+}
