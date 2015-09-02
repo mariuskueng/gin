@@ -9,7 +9,17 @@ var showdown  = require('showdown');
 var clipboard = require('clipboard');
 var path = require('path');
 
-var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settingsFile;
+var win,
+    editor,
+    preview,
+    previewVisible,
+    statusbarVisible,
+    converter,
+    cm,
+    menu,
+    file,
+    text,
+    settingsFile;
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
