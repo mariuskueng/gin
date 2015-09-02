@@ -9,7 +9,17 @@ var showdown  = require('showdown');
 var clipboard = require('clipboard');
 var path = require('path');
 
-var win, editor, preview, previewVisible, statusbarVisible, converter, cm, menu, file, text, settingsFile;
+var win,
+    editor,
+    preview,
+    previewVisible,
+    statusbarVisible,
+    converter,
+    cm,
+    menu,
+    file,
+    text,
+    settingsFile;
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
@@ -64,6 +74,30 @@ onload = function() {
     if (statusbarVisible) renderStatusBarValues();
   });
 
+  window.onbeforeunload = function(e) {
+    // Unlike usual browsers, in which a string should be returned and the user is
+    // prompted to confirm the page unload, Electron gives developers more options.
+    // Returning empty string or false would prevent the unloading now.
+    // You can also use the dialog API to let the user confirm closing the application.
+    if ((cm.getValue() === "") || (cm.getValue() === file.text)) {
+      console.log('editor text is unchanged');
+      e.returnValue = true;
+    } else {
+      console.log('editor text has changed');
+      // save file and close window
+      if (file.path) {
+        writeFile();
+        e.returnValue = true;
+      } else {
+        e.returnValue = false;
+        // Prompt save dialog
+        createFile(function(e) {
+          BrowserWindow.getFocusedWindow().destroy();
+        });
+      }
+    }
+  };
+
   settingsFile = __dirname + '/public/assets/settings.json';
 };
 
@@ -93,19 +127,19 @@ function writeFile(callback) {
     file.text = cm.getValue();
     fs.writeFile(file.path, file.text, 'utf8', function() {
       console.log('Wrote a file.');
+      if (callback) callback();
     });
   } else {
     console.log('no file specified. create new file.');
-    createFile();
+    createFile(callback);
   }
-  if (callback) callback();
 }
 
 ipc.on('write-file', function() {
   writeFile();
 });
 
-function createFile() {
+function createFile(callback) {
   dialog.showSaveDialog({ filters: [
      { name: 'Markdown', extensions: ['md', 'markdown'] }
     ]}, function (fileName) {
@@ -118,6 +152,7 @@ function createFile() {
         } else {
           dialog.showErrorBox("File Save Error", err.message);
         }
+        if (callback) callback();
       });
   });
 }
