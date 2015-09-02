@@ -103,19 +103,19 @@ function writeFile(callback) {
     file.text = cm.getValue();
     fs.writeFile(file.path, file.text, 'utf8', function() {
       console.log('Wrote a file.');
+      if (callback) callback();
     });
   } else {
     console.log('no file specified. create new file.');
-    createFile();
+    createFile(callback);
   }
-  if (callback) callback();
 }
 
 ipc.on('write-file', function() {
   writeFile();
 });
 
-function createFile() {
+function createFile(callback) {
   dialog.showSaveDialog({ filters: [
      { name: 'Markdown', extensions: ['md', 'markdown'] }
     ]}, function (fileName) {
@@ -129,6 +129,8 @@ function createFile() {
           dialog.showErrorBox("File Save Error", err.message);
         }
       });
+  }, function() {
+    if (callback) callback();
   });
 }
 
