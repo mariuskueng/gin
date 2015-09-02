@@ -143,7 +143,11 @@ function createFile(callback) {
   dialog.showSaveDialog({ filters: [
      { name: 'Markdown', extensions: ['md', 'markdown'] }
     ]}, function (fileName) {
-      if (fileName === undefined) return;
+      if (fileName === undefined) {
+        // if dialog gets closed without saving run callback and return
+        if (callback) callback();
+        return;
+      }
 
       file.path = fileName;
       writeFile(function (err){
@@ -152,9 +156,10 @@ function createFile(callback) {
         } else {
           dialog.showErrorBox("File Save Error", err.message);
         }
-        if (callback) callback();
       });
-  });
+      if (callback) callback();
+    }
+  );
 }
 
 function setWindowTitle(title) {
