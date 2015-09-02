@@ -79,20 +79,42 @@ onload = function() {
     // prompted to confirm the page unload, Electron gives developers more options.
     // Returning empty string or false would prevent the unloading now.
     // You can also use the dialog API to let the user confirm closing the application.
+    e.returnValue = false;
+
     if ((cm.getValue() === "") || (cm.getValue() === file.text)) {
-      console.log('editor text is unchanged');
       e.returnValue = true;
     } else {
-      console.log('editor text has changed');
       // save file and close window
       if (file.path) {
-        writeFile();
-        e.returnValue = true;
+          writeFile();
+          e.returnValue = true;
       } else {
-        e.returnValue = false;
-        // Prompt save dialog
-        createFile(function(e) {
-          BrowserWindow.getFocusedWindow().destroy();
+
+        var buttons = [
+          "Save As",
+          "Cancel",
+          "Don't save"
+        ];
+
+        dialog.showMessageBox({
+          type: "question",
+          buttons: buttons,
+          title: 'Do you want to save the changes made to the document "Untitled"?',
+          message: "Your changes will be lost if you don't save them."
+        }, function(response) {
+          console.log(response);
+          if (response === 0) {
+            // Save as
+            // Prompt save dialog
+            createFile(function(e) {
+              BrowserWindow.getFocusedWindow().destroy();
+            });
+          } else if (response === 2) {
+            // Don't save
+            BrowserWindow.getFocusedWindow().destroy();
+          } else {
+            // Cancel, do nothing
+          }
         });
       }
     }
