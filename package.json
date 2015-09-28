@@ -1,12 +1,12 @@
 {
   "name": "gin",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "JavaScript Markdown Editor for Mac",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build": "electron-packager ./ Gin --out=dist --overwrite --platform=darwin --arch=x64 --version=0.30.6 --app-version=0.6.2 --icon=./public/assets/Gin.icns"
+    "build": "electron-packager ./ Gin --out=dist --overwrite --platform=darwin --arch=x64 --version=0.30.6 --app-version=0.6.3 --icon=./public/assets/Gin.icns"
   },
   "repository": {
     "type": "git",
