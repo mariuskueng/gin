@@ -354,12 +354,6 @@ function newFile(passedFile) {
     writeSettings(settings);
   });
 
-  w.on('resize', function() {
-    var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
-    windowSize.width = currentWindowSize[0];
-    windowSize.height = currentWindowSize[1];
-  });
-
   // Emitted when the window is closed.
   w.on('closed', function(e) {
     e.preventDefault();

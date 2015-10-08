@@ -81,6 +81,9 @@ onload = function() {
     // You can also use the dialog API to let the user confirm closing the application.
     e.returnValue = false;
 
+    // save windows size to settings
+    setWindowSize();
+
     if ((cm.getValue() === "") || (cm.getValue() === file.text)) {
       e.returnValue = true;
     } else {
@@ -307,6 +310,14 @@ function renderStatusBarValues() {
   var wordsCount = countWords();
   countCharacters();
   setReadingDuration(wordsCount);
+}
+
+function setWindowSize() {
+  var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
+  var settings = readSettings();
+  settings.width = currentWindowSize[0];
+  settings.height = currentWindowSize[1];
+  writeSettings(settings);
 }
 
 function readSettings(callback) {
