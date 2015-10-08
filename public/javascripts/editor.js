@@ -13,7 +13,6 @@ var win,
     editor,
     preview,
     previewVisible,
-    statusbarVisible,
     converter,
     cm,
     menu,
@@ -26,13 +25,6 @@ onload = function() {
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
 
-  file = {
-    name: '',
-    path: '',
-    text: '',
-    unsaved: true,
-    changed: false
-  };
 
   previewVisible = false;
   statusbarVisible = false;
@@ -126,67 +118,6 @@ onload = function() {
   settingsFile = __dirname + '/public/assets/settings.json';
 };
 
-function readFile(newFile) {
-  if (newFile) {
-    fs.readFile(newFile, 'utf8', function(err, data) {
-      if (err) throw err;
-      file.path = newFile;
-      file.text = data;
-      cm.setValue(file.text);
-      setWindowTitle(file.path);
-      // Add file to recent docs in osx dock
-      app.addRecentDocument(file.path);
-      console.log('Read a file.');
-    });
-  } else {
-    console.error('No file given');
-  }
-}
-
-ipc.on('read-file', function(file) {
-  readFile(file);
-});
-
-function writeFile(callback) {
-  if (file.path) {
-    file.text = cm.getValue();
-    fs.writeFile(file.path, file.text, 'utf8', function() {
-      console.log('Wrote a file.');
-      if (callback) callback();
-    });
-  } else {
-    console.log('no file specified. create new file.');
-    createFile(callback);
-  }
-}
-
-ipc.on('write-file', function() {
-  writeFile();
-});
-
-function createFile(callback) {
-  dialog.showSaveDialog({ filters: [
-     { name: 'Markdown', extensions: ['md', 'markdown'] }
-    ]}, function (fileName) {
-      if (fileName === undefined) {
-        // if dialog gets closed without saving run callback and return
-        if (callback) callback();
-        return;
-      }
-
-      file.path = fileName;
-      writeFile(function (err){
-        if (err === undefined) {
-          setWindowTitle(file.path);
-        } else {
-          dialog.showErrorBox("File Save Error", err.message);
-        }
-      });
-      if (callback) callback();
-    }
-  );
-}
-
 function setWindowTitle(title) {
   if (title.indexOf('/') > -1) {
     var titleParts = title.split('/');
@@ -257,61 +188,6 @@ function clickLinkEvent(e) {
   shell.openExternal(e.srcElement.href);
 }
 
-function getStatusBarText(value, text) {
-  var statusBarText = value + ' ' + text;
-  if (value > 1 || value < 1) statusBarText += 's';
-  return statusBarText;
-}
-
-function countWords() {
-  var statusWords = document.querySelector('.status-words');
-  var wordsCount = 0;
-
-  if (cm.getValue()) wordsCount = cm.getValue().split(' ').length;
-
-  statusWords.innerHTML = getStatusBarText(wordsCount, 'word');
-
-  return wordsCount;
-}
-
-function countCharacters() {
-  var statusChars = document.querySelector('.status-chars');
-  var charsCount = 0;
-
-  if (cm.getValue()) charsCount = cm.getValue().length;
-
-  statusChars.innerHTML = getStatusBarText(charsCount, 'character');
-
-  return charsCount;
-}
-
-function setReadingDuration(wordsCount) {
-  var statusReading = document.querySelector('.status-duration');
-  var timeUnit = 'second';
-  var wpm = 250; // words per minute
-  var time = wordsCount / wpm;
-
-  if (wordsCount >= wpm) {
-    // minutes
-    timeUnit = 'minute';
-  } else {
-    // seconds
-    time = time * 60;
-  }
-
-  time = Math.round(time * 10) / 10;
-
-  statusReading.innerHTML = getStatusBarText(time, timeUnit);
-
-  return time;
-}
-
-function renderStatusBarValues() {
-  var wordsCount = countWords();
-  countCharacters();
-  setReadingDuration(wordsCount);
-}
-
 function setWindowSize() {
   var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
   var settings = readSettings();
@@ -345,80 +221,6 @@ ipc.on('write-settings', function(settings) {
   writeSettings(settings);
 });
 
-ipc.on('format-bold', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("****");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-  } else {
-    text = "**" + cm.getSelection() + "**";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-link', function() {
-  var text = cm.getSelection();
-  var cursor;
-  if (text === '') {
-    cm.replaceSelection("[]()");
-    cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
-  } else {
-    text = "[" + cm.getSelection() + "]()";
-    cm.replaceSelection(text);
-    cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  }
-});
-
-ipc.on('format-italic', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("**");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  } else {
-    text = "*" + cm.getSelection() + "*";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-underline', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("__");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  } else {
-    text = "_" + cm.getSelection() + "_";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-strikethrough', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("~~~~");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-  } else {
-    text = "~~" + cm.getSelection() + "~~";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-inline-code', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("``");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  } else {
-    text = "`" + cm.getSelection() + "`";
-    cm.replaceSelection(text);
-  }
-});
 
 ipc.on('load-settings', function(settings) {
   if (settings.isPreviewVisible) {
