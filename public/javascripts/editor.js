@@ -16,7 +16,6 @@ var win,
     converter,
     cm,
     menu,
-    file,
     text,
     settingsFile;
 
@@ -24,7 +23,6 @@ onload = function() {
   win = BrowserWindow.getFocusedWindow();
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
-
 
   previewVisible = false;
   statusbarVisible = false;
@@ -76,11 +74,11 @@ onload = function() {
     // save windows size to settings
     setWindowSize();
 
-    if ((cm.getValue() === "") || (cm.getValue() === file.text)) {
+    if ((cm.getValue() === "") || (cm.getValue() === File.text)) {
       e.returnValue = true;
     } else {
       // save file and close window
-      if (file.path) {
+      if (File.path) {
           writeFile();
           e.returnValue = true;
       } else {
@@ -189,11 +187,14 @@ function clickLinkEvent(e) {
 }
 
 function setWindowSize() {
-  var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
-  var settings = readSettings();
-  settings.width = currentWindowSize[0];
-  settings.height = currentWindowSize[1];
-  writeSettings(settings);
+  var win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    var currentWindowSize = win.getSize();
+    var settings = readSettings();
+    settings.width = currentWindowSize[0];
+    settings.height = currentWindowSize[1];
+    writeSettings(settings);
+  }
 }
 
 function readSettings(callback) {
