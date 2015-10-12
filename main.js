@@ -5,7 +5,7 @@ var path = require('path');
 var ipc = require('ipc');
 var fs = require('fs');
 var Menu = require('menu');
-var menuTemplate = require('./public/javascripts/menu');
+var menuTemplate = require('./menu');
 
 // Report crashes to our server.
 require('crash-reporter').start();
