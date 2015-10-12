@@ -1,26 +1,29 @@
 var remote = require('remote');
 var ipc = require('ipc');
+var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
+var fs = require('fs');
+var config = require('./settings');
 
-var File = function(path) {
-  this.path = path;
-  this.text = '';
-  this.unsaved = true;
-  this.changed = false;
+var File = {
+  path: '',
+  text: '',
+  unsaved: true,
+  changed: false
 };
 
 // File operations
 
-File.prototype.readFile = function(newFile) {
+File.readFile = function(newFile) {
   if (newFile) {
     fs.readFile(newFile, 'utf8', function(err, data) {
       if (err) throw err;
-      file.path = newFile;
-      file.text = data;
-      cm.setValue(file.text);
-      setWindowTitle(file.path);
+      File.path = newFile;
+      File.text = data;
+      cm.setValue(File.text);
+      setWindowTitle(File.path);
       // Add file to recent docs in osx dock
-      app.addRecentDocument(file.path);
+      app.addRecentDocument(File.path);
       console.log('Read a file.');
     });
   } else {
@@ -28,20 +31,20 @@ File.prototype.readFile = function(newFile) {
   }
 };
 
-ipc.on('read-file', function(file) {
-  File.readFile(file);
+ipc.on('read-file', function(path) {
+  File.readFile(path);
 });
 
-File.prototype.writeFile = function(callback) {
-  if (file.path) {
-    file.text = cm.getValue();
-    fs.writeFile(file.path, file.text, 'utf8', function() {
+File.writeFile = function(callback) {
+  if (File.path) {
+    File.text = cm.getValue();
+    fs.writeFile(File.path, File.text, 'utf8', function() {
       console.log('Wrote a file.');
       if (callback) callback();
     });
   } else {
     console.log('no file specified. create new file.');
-    createFile(callback);
+    File.createFile(callback);
   }
 };
 
@@ -49,7 +52,7 @@ ipc.on('write-file', function() {
   File.writeFile();
 });
 
-File.prototype.createFile = function(callback) {
+File.createFile = function(callback) {
   dialog.showSaveDialog({ filters: [
      { name: 'Markdown', extensions: ['md', 'markdown'] }
     ]}, function (fileName) {
@@ -59,10 +62,10 @@ File.prototype.createFile = function(callback) {
         return;
       }
 
-      file.path = fileName;
-      writeFile(function (err){
+      File.path = fileName;
+      File.writeFile(function (err){
         if (err === undefined) {
-          setWindowTitle(file.path);
+          setWindowTitle(File.path);
         } else {
           dialog.showErrorBox("File Save Error", err.message);
         }

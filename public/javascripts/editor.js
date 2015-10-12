@@ -4,10 +4,10 @@ var ipc = require('ipc');
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
 var shell = remote.require('shell');
-var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 var path = require('path');
+var settings = require('./settings');
 
 var win,
     editor,
@@ -17,7 +17,7 @@ var win,
     cm,
     menu,
     text,
-    settingsFile;
+    settingsFile = __dirname + '/public/assets/settings.json';
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
@@ -112,17 +112,15 @@ onload = function() {
       }
     }
   };
-
-  settingsFile = __dirname + '/public/assets/settings.json';
 };
 
 function setWindowTitle(title) {
   if (title.indexOf('/') > -1) {
     var titleParts = title.split('/');
     title = titleParts[titleParts.length - 1];
-    file.name = title;
+    File.name = title;
   }
-  BrowserWindow.getFocusedWindow().setTitle(file.name);
+  BrowserWindow.getFocusedWindow().setTitle(File.name);
 }
 
 function togglePreview(dontSaveSettings) {
@@ -132,9 +130,9 @@ function togglePreview(dontSaveSettings) {
 
   // update preview setting
   if (!dontSaveSettings) {
-    var settings = readSettings(settingsFile);
-    settings.isPreviewVisible = previewVisible;
-    writeSettings(settings);
+    var settings = editorSettings.readSettings(settingsFile);
+    editorSettings.isPreviewVisible = previewVisible;
+    settings.writeSettings(editorSettings);
   }
 }
 
@@ -149,9 +147,9 @@ function toggleStatusBar(dontSaveSettings) {
 
   // update statusbar setting
   if (!dontSaveSettings) {
-    var settings = readSettings(settingsFile);
-    settings.isStatusbarVisible = statusbarVisible;
-    writeSettings(settings);
+    var editorSettings = settings.readSettings(settingsFile);
+    editorSettings.isStatusbarVisible = statusbarVisible;
+    settings.writeSettings(editorSettings);
   }
 }
 
@@ -173,7 +171,7 @@ function renderMarkdown() {
     if (imagePath.indexOf('http') > -1)
       images[j].setAttribute('src', imagePath);
     else
-      images[j].setAttribute('src', path.resolve(file.path, '..', imagePath));
+      images[j].setAttribute('src', path.resolve(File.path, '..', imagePath));
   }
 }
 
@@ -190,41 +188,20 @@ function setWindowSize() {
   var win = BrowserWindow.getFocusedWindow();
   if (win) {
     var currentWindowSize = win.getSize();
-    var settings = readSettings();
-    settings.width = currentWindowSize[0];
-    settings.height = currentWindowSize[1];
-    writeSettings(settings);
+    var editorSettings = settings.readSettings();
+    editorSettings.width = currentWindowSize[0];
+    editorSettings.height = currentWindowSize[1];
+    settings.writeSettings(editorSettings);
   }
 }
 
-function readSettings(callback) {
-  var settings = {};
-  try {
-    var data = fs.readFileSync(settingsFile, 'utf8');
-    if (data !== undefined) {
-      settings = JSON.parse(data);
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return settings;
-}
-
-function writeSettings(settings) {
-  try {
-    fs.writeFile(settingsFile, JSON.stringify(settings));
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-ipc.on('write-settings', function(settings) {
-  writeSettings(settings);
+ipc.on('write-settings', function(editorSettings) {
+  settings.writeSettings(editorSettings);
 });
 
 
-ipc.on('load-settings', function(settings) {
-  if (settings.isPreviewVisible) {
+ipc.on('load-settings', function(editorSettings) {
+  if (editorSettings.isPreviewVisible) {
     // resaving setting is not necessary
     togglePreview(true);
   }
