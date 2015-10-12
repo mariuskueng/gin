@@ -1,8 +1,11 @@
-var BrowserWindow = require('browser-window');
-var dialog = require('dialog');
+const app = require('app');
+const BrowserWindow = require('browser-window');
+const dialog = require('dialog');
+const appName = app.getName();
+const Menu = require('menu');
 
-exports.getTemplate = function() {
-  return [{
+const template = [
+  {
     label: 'Gin',
     submenu: [
       {
@@ -268,5 +271,7 @@ exports.getTemplate = function() {
   {
     label: 'Help',
     submenu: []
-  }];
-};
+  }
+];
+
+module.exports = Menu.buildFromTemplate(template);

@@ -5,7 +5,7 @@ var path = require('path');
 var ipc = require('ipc');
 var fs = require('fs');
 var Menu = require('menu');
-var menuTemplate = require('./public/javascripts/menu-template.js');
+var menuTemplate = require('./public/javascripts/menu');
 
 // Report crashes to our server.
 require('crash-reporter').start();
@@ -58,9 +58,7 @@ function newFile(passedFile) {
     'min-height': 200
   });
 
-  var template = menuTemplate.getTemplate();
-  var menu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(menuTemplate);
 
   // and load the index.html of the app.
   var indexPath = 'file://' + __dirname + '/index.html';
