@@ -178,6 +178,7 @@ function createFile(callback) {
       writeFile(function (err){
         if (err === undefined) {
           setWindowTitle(file.path);
+          app.addRecentDocument(file.path);
         } else {
           dialog.showErrorBox("File Save Error", err.message);
         }
