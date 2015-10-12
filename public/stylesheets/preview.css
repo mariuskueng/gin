@@ -18,14 +18,6 @@ body.preview-visible #preview {
   display: block;
 }
 
-#preview li {
-  color: #2ca997;
-}
-
-#preview a {
-  color: #3496bd;
-}
-
 #preview pre,
 #preview code {
   font-family: Courier, monospace;

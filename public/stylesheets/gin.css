@@ -1,5 +1,6 @@
 /* gin theme */
 
+/* editor */
 .CodeMirror {
   font-family: "Menlo", "Courier" monospace;
   font-size: 1rem;
@@ -98,4 +99,14 @@ table tr th:first-child {
 table tr td:last-child,
 table tr th:last-child {
   border-right: 0;
+}
+
+/* preview */
+
+#preview li {
+  color: #2ca997;
+}
+
+#preview a {
+  color: #3496bd;
 }
