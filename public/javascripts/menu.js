@@ -4,6 +4,12 @@ const dialog = require('dialog');
 const appName = app.getName();
 const Menu = require('menu');
 
+function sendAction(action) {
+	const win = BrowserWindow.getFocusedWindow();
+	win.restore();
+	win.webContents.send(action);
+}
+
 const template = [
   {
     label: 'Gin',
@@ -49,7 +55,9 @@ const template = [
       {
         label: 'Quit',
         accelerator: 'CmdOrCtrl+Q',
-        selector: 'terminate:'
+        click() {
+          app.quit();
+        }
       },
     ]
   },
@@ -59,14 +67,14 @@ const template = [
       {
         label: 'New File',
         accelerator: 'Cmd+N',
-        click: function() {
+        click() {
           newFile();
         }
       },
       {
         label: 'Open File...',
         accelerator: 'Cmd+O',
-        click: function() {
+        click() {
           var properties = ['createDirectory', 'openFile'];
 
           dialog.showOpenDialog({
@@ -86,9 +94,8 @@ const template = [
       {
         label: 'Save File...',
         accelerator: 'Cmd+S',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('write-file');
+        click() {
+          sendAction('write-file');
         }
       },
       {
@@ -97,10 +104,9 @@ const template = [
       {
         label: 'Print...',
         accelerator: 'Cmd+P',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('render-markdown');
-          window.print();
+        click() {
+          sendAction('render-markdown');
+          BrowserWindow.getFocusedWindow().print();
         }
       }
     ]
@@ -149,48 +155,42 @@ const template = [
       {
         label: 'Link',
         accelerator: 'Cmd+K',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('format-link');
+        click() {
+          sendAction('format-link');
         }
       },
       {
         label: 'Bold',
         accelerator: 'Cmd+B',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('format-bold');
+        click() {
+          sendAction('format-bold');
         }
       },
       {
         label: 'Italic',
         accelerator: 'Cmd+I',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('format-italic');
+        click() {
+          sendAction('format-italic');
         }
       },
       {
         label: 'Underline',
         accelerator: 'Cmd+U',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('format-underline');
+        click() {
+          sendAction('format-underline');
         }
       },
       {
         label: 'Strikethrough',
         accelerator: 'Cmd+Shift+T',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('format-strikethrough');
+        click() {
+          sendAction('format-strikethrough');
         }
       },
       {
         label: 'Inline Code',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('format-inline-code');
+        click() {
+          sendAction('format-inline-code');
         }
       }
     ]
@@ -201,17 +201,15 @@ const template = [
       {
         label: 'Toggle Status Bar',
         accelerator: 'Cmd+/',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('toggle-statusbar');
+        click() {
+          sendAction('toggle-statusbar');
         }
       },
       {
         label: 'Toggle Preview',
         accelerator: 'Alt+Cmd+P',
-        click: function() {
-          var window = BrowserWindow.getFocusedWindow();
-          window.webContents.send('toggle-preview');
+        click() {
+          sendAction('toggle-preview');
         }
       },
       {
@@ -220,14 +218,14 @@ const template = [
       {
         label: 'Reload',
         accelerator: 'CmdOrCtrl+R',
-        click: function() {
+        click() {
           BrowserWindow.getFocusedWindow().reload();
         }
       },
       {
         label: 'Toggle DevTools',
         accelerator: 'Alt+CmdOrCtrl+I',
-        click: function() {
+        click() {
           BrowserWindow.getFocusedWindow().toggleDevTools();
         }
       },
@@ -237,7 +235,7 @@ const template = [
       {
         label: 'Toggle Fullscreen',
         accelerator: 'Alt+Cmd+F',
-        click: function() {
+        click() {
           if (BrowserWindow.getFocusedWindow().isFullScreen())
             BrowserWindow.getFocusedWindow().setFullScreen(false);
           else
