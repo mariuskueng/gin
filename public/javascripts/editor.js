@@ -130,7 +130,7 @@ function togglePreview(dontSaveSettings) {
 
   // update preview setting
   if (!dontSaveSettings) {
-    var settings = editorSettings.readSettings(settingsFile);
+    var editorSettings = settings.readSettings(settingsFile);
     editorSettings.isPreviewVisible = previewVisible;
     settings.writeSettings(editorSettings);
   }
@@ -205,7 +205,7 @@ ipc.on('load-settings', function(editorSettings) {
     // resaving setting is not necessary
     togglePreview(true);
   }
-  if (settings.isStatusbarVisible) {
+  if (editorSettings.isStatusbarVisible) {
     toggleStatusBar(true);
   }
 });

@@ -35,10 +35,10 @@ app.on('activate-with-no-open-windows', function(event) {
   newFile();
 });
 
-function sendAction(action) {
+function sendAction(action, value) {
 	var win = BrowserWindow.getFocusedWindow();
 	win.restore();
-	win.webContents.send(action);
+	win.webContents.send(action, value);
 }
 
 function newFile (passedFile) {
@@ -354,7 +354,7 @@ function newFile (passedFile) {
 
   w.on('close', function(e) {
     // save current window size to settings
-    settings.readSettings();
+    editorSettings = settings.readSettings();
     if (windowSize) {
       editorSettings.width = windowSize.width;
       editorSettings.height = windowSize.height;
