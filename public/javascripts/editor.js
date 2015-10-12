@@ -4,35 +4,25 @@ var ipc = require('ipc');
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
 var shell = remote.require('shell');
-var fs = require('fs');
 var showdown  = require('showdown');
 var clipboard = require('clipboard');
 var path = require('path');
+var settings = require('./settings');
 
 var win,
     editor,
     preview,
     previewVisible,
-    statusbarVisible,
     converter,
     cm,
     menu,
-    file,
     text,
-    settingsFile;
+    settingsFile = __dirname + '/public/assets/settings.json';
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
   editor = document.getElementById("editor");
   preview = document.getElementById("preview");
-
-  file = {
-    name: '',
-    path: '',
-    text: '',
-    unsaved: true,
-    changed: false
-  };
 
   previewVisible = false;
   statusbarVisible = false;
@@ -84,11 +74,11 @@ onload = function() {
     // save windows size to settings
     setWindowSize();
 
-    if ((cm.getValue() === "") || (cm.getValue() === file.text)) {
+    if ((cm.getValue() === "") || (cm.getValue() === File.text)) {
       e.returnValue = true;
     } else {
       // save file and close window
-      if (file.path) {
+      if (File.path) {
           writeFile();
           e.returnValue = true;
       } else {
@@ -122,79 +112,15 @@ onload = function() {
       }
     }
   };
-
-  settingsFile = __dirname + '/public/assets/settings.json';
 };
-
-function readFile(newFile) {
-  if (newFile) {
-    fs.readFile(newFile, 'utf8', function(err, data) {
-      if (err) throw err;
-      file.path = newFile;
-      file.text = data;
-      cm.setValue(file.text);
-      setWindowTitle(file.path);
-      // Add file to recent docs in osx dock
-      app.addRecentDocument(file.path);
-      console.log('Read a file.');
-    });
-  } else {
-    console.error('No file given');
-  }
-}
-
-ipc.on('read-file', function(file) {
-  readFile(file);
-});
-
-function writeFile(callback) {
-  if (file.path) {
-    file.text = cm.getValue();
-    fs.writeFile(file.path, file.text, 'utf8', function() {
-      console.log('Wrote a file.');
-      if (callback) callback();
-    });
-  } else {
-    console.log('no file specified. create new file.');
-    createFile(callback);
-  }
-}
-
-ipc.on('write-file', function() {
-  writeFile();
-});
-
-function createFile(callback) {
-  dialog.showSaveDialog({ filters: [
-     { name: 'Markdown', extensions: ['md', 'markdown'] }
-    ]}, function (fileName) {
-      if (fileName === undefined) {
-        // if dialog gets closed without saving run callback and return
-        if (callback) callback();
-        return;
-      }
-
-      file.path = fileName;
-      writeFile(function (err){
-        if (err === undefined) {
-          setWindowTitle(file.path);
-          app.addRecentDocument(file.path);
-        } else {
-          dialog.showErrorBox("File Save Error", err.message);
-        }
-      });
-      if (callback) callback();
-    }
-  );
-}
 
 function setWindowTitle(title) {
   if (title.indexOf('/') > -1) {
     var titleParts = title.split('/');
     title = titleParts[titleParts.length - 1];
-    file.name = title;
+    File.name = title;
   }
-  BrowserWindow.getFocusedWindow().setTitle(file.name);
+  BrowserWindow.getFocusedWindow().setTitle(File.name);
 }
 
 function togglePreview(dontSaveSettings) {
@@ -204,9 +130,9 @@ function togglePreview(dontSaveSettings) {
 
   // update preview setting
   if (!dontSaveSettings) {
-    var settings = readSettings(settingsFile);
-    settings.isPreviewVisible = previewVisible;
-    writeSettings(settings);
+    var settings = editorSettings.readSettings(settingsFile);
+    editorSettings.isPreviewVisible = previewVisible;
+    settings.writeSettings(editorSettings);
   }
 }
 
@@ -221,9 +147,9 @@ function toggleStatusBar(dontSaveSettings) {
 
   // update statusbar setting
   if (!dontSaveSettings) {
-    var settings = readSettings(settingsFile);
-    settings.isStatusbarVisible = statusbarVisible;
-    writeSettings(settings);
+    var editorSettings = settings.readSettings(settingsFile);
+    editorSettings.isStatusbarVisible = statusbarVisible;
+    settings.writeSettings(editorSettings);
   }
 }
 
@@ -245,7 +171,7 @@ function renderMarkdown() {
     if (imagePath.indexOf('http') > -1)
       images[j].setAttribute('src', imagePath);
     else
-      images[j].setAttribute('src', path.resolve(file.path, '..', imagePath));
+      images[j].setAttribute('src', path.resolve(File.path, '..', imagePath));
   }
 }
 
@@ -258,171 +184,24 @@ function clickLinkEvent(e) {
   shell.openExternal(e.srcElement.href);
 }
 
-function getStatusBarText(value, text) {
-  var statusBarText = value + ' ' + text;
-  if (value > 1 || value < 1) statusBarText += 's';
-  return statusBarText;
-}
-
-function countWords() {
-  var statusWords = document.querySelector('.status-words');
-  var wordsCount = 0;
-
-  if (cm.getValue()) wordsCount = cm.getValue().split(' ').length;
-
-  statusWords.innerHTML = getStatusBarText(wordsCount, 'word');
-
-  return wordsCount;
-}
-
-function countCharacters() {
-  var statusChars = document.querySelector('.status-chars');
-  var charsCount = 0;
-
-  if (cm.getValue()) charsCount = cm.getValue().length;
-
-  statusChars.innerHTML = getStatusBarText(charsCount, 'character');
-
-  return charsCount;
-}
-
-function setReadingDuration(wordsCount) {
-  var statusReading = document.querySelector('.status-duration');
-  var timeUnit = 'second';
-  var wpm = 250; // words per minute
-  var time = wordsCount / wpm;
-
-  if (wordsCount >= wpm) {
-    // minutes
-    timeUnit = 'minute';
-  } else {
-    // seconds
-    time = time * 60;
-  }
-
-  time = Math.round(time * 10) / 10;
-
-  statusReading.innerHTML = getStatusBarText(time, timeUnit);
-
-  return time;
-}
-
-function renderStatusBarValues() {
-  var wordsCount = countWords();
-  countCharacters();
-  setReadingDuration(wordsCount);
-}
-
 function setWindowSize() {
-  var currentWindowSize = BrowserWindow.getFocusedWindow().getSize();
-  var settings = readSettings();
-  settings.width = currentWindowSize[0];
-  settings.height = currentWindowSize[1];
-  writeSettings(settings);
-}
-
-function readSettings(callback) {
-  var settings = {};
-  try {
-    var data = fs.readFileSync(settingsFile, 'utf8');
-    if (data !== undefined) {
-      settings = JSON.parse(data);
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return settings;
-}
-
-function writeSettings(settings) {
-  try {
-    fs.writeFile(settingsFile, JSON.stringify(settings));
-  } catch (e) {
-    console.error(e);
+  var win = BrowserWindow.getFocusedWindow();
+  if (win) {
+    var currentWindowSize = win.getSize();
+    var editorSettings = settings.readSettings();
+    editorSettings.width = currentWindowSize[0];
+    editorSettings.height = currentWindowSize[1];
+    settings.writeSettings(editorSettings);
   }
 }
 
-ipc.on('write-settings', function(settings) {
-  writeSettings(settings);
+ipc.on('write-settings', function(editorSettings) {
+  settings.writeSettings(editorSettings);
 });
 
-ipc.on('format-bold', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("****");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-  } else {
-    text = "**" + cm.getSelection() + "**";
-    cm.replaceSelection(text);
-  }
-});
 
-ipc.on('format-link', function() {
-  var text = cm.getSelection();
-  var cursor;
-  if (text === '') {
-    cm.replaceSelection("[]()");
-    cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 3 });
-  } else {
-    text = "[" + cm.getSelection() + "]()";
-    cm.replaceSelection(text);
-    cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  }
-});
-
-ipc.on('format-italic', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("**");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  } else {
-    text = "*" + cm.getSelection() + "*";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-underline', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("__");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  } else {
-    text = "_" + cm.getSelection() + "_";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-strikethrough', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("~~~~");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 2 });
-  } else {
-    text = "~~" + cm.getSelection() + "~~";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('format-inline-code', function() {
-  var text = cm.getSelection();
-  if (text === '') {
-    cm.replaceSelection("``");
-    var cursor = cm.getCursor();
-    cm.setCursor({line: cursor.line, ch: cursor.ch - 1 });
-  } else {
-    text = "`" + cm.getSelection() + "`";
-    cm.replaceSelection(text);
-  }
-});
-
-ipc.on('load-settings', function(settings) {
-  if (settings.isPreviewVisible) {
+ipc.on('load-settings', function(editorSettings) {
+  if (editorSettings.isPreviewVisible) {
     // resaving setting is not necessary
     togglePreview(true);
   }
