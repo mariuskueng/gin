@@ -1,6 +1,6 @@
 var fs = require('fs');
 
-var settingsFile = __dirname + '/public/assets/settings.json';
+var settingsFile = __dirname + '/assets/settings.json';
 
 module.exports = {
   readSettings: function() {

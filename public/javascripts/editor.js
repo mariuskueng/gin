@@ -16,8 +16,7 @@ var win,
     converter,
     cm,
     menu,
-    text,
-    settingsFile = __dirname + '/public/assets/settings.json';
+    text;
 
 onload = function() {
   win = BrowserWindow.getFocusedWindow();
@@ -147,7 +146,7 @@ function toggleStatusBar(dontSaveSettings) {
 
   // update statusbar setting
   if (!dontSaveSettings) {
-    var editorSettings = settings.readSettings(settingsFile);
+    var editorSettings = settings.readSettings();
     editorSettings.isStatusbarVisible = statusbarVisible;
     settings.writeSettings(editorSettings);
   }
