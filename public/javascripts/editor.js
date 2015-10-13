@@ -130,7 +130,7 @@ function togglePreview(dontSaveSettings) {
 
   // update preview setting
   if (!dontSaveSettings) {
-    var editorSettings = settings.readSettings(settingsFile);
+    var editorSettings = settings.readSettings();
     editorSettings.isPreviewVisible = previewVisible;
     settings.writeSettings(editorSettings);
   }

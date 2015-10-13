@@ -35,11 +35,6 @@ app.on('activate-with-no-open-windows', function(event) {
   newFile();
 });
 
-function sendAction(action, value) {
-	var win = BrowserWindow.getFocusedWindow();
-	win.restore();
-	win.webContents.send(action, value);
-}
 
 function newFile (passedFile) {
   // Read settings
@@ -61,6 +56,10 @@ function newFile (passedFile) {
     'min-width': 400,
     'min-height': 200
   });
+
+  function sendAction(action, value) {
+  	w.webContents.send(action, value);
+  }
 
   var menuTemplate = [
     {
@@ -298,6 +297,23 @@ function newFile (passedFile) {
       ]
     },
     {
+      label: 'Themes',
+      submenu: [
+        {
+          label: 'Gin Light',
+          click: function() {
+            sendAction('toggle-theme', 'gin');
+          }
+        },
+        {
+          label: 'Gin Dark',
+          click: function() {
+            sendAction('toggle-theme', 'gin-dark');
+          }
+        }
+      ]
+    },
+    {
       label: 'Window',
       submenu: [
         {
@@ -341,6 +357,9 @@ function newFile (passedFile) {
 
   w.webContents.on("did-finish-load", function() {
     w.webContents.send('load-settings', editorSettings);
+
+    if (editorSettings.theme)
+      w.webContents.send('set-theme', editorSettings.theme);
 
     if (passedFile) {
       w.webContents.send('read-file', passedFile);
