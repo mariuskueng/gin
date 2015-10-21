@@ -4,4 +4,4 @@ dist/
 
 *npm-debug.log
 
-public/assets/settings.json
+assets/settings.json
