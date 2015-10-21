@@ -5,6 +5,7 @@
   color: #808080;
 }
 
+/* list */
 .cm-variable-2 {
   color: #2ca997;
 }
@@ -44,6 +45,7 @@
   font-weight: normal;
 }
 
+/* link */
 .cm-link,
 .cm-formatting-link,
 .cm-url {
@@ -51,6 +53,7 @@
   text-decoration: none;
 }
 
+/* image */
 .cm-tag,
 .cm-tag + .cm-string,
 .cm-tag + .cm-string + .cm-url,

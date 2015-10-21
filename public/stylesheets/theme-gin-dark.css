@@ -2,8 +2,8 @@ body,
 .CodeMirror,
 #statusbar
 {
-  background-color: #222631;
-  color: #c2c6cb;
+  background-color: #393939;
+  color: #D3D0C8;
 }
 
 /*.CodeMirror,*/
@@ -15,17 +15,36 @@ body,
 .cm-header-5,
 .cm-header-6
 {
-  color: #c2c6cb;
+  color: #D3D0C8;
+}
+
+/* list */
+.cm-variable-2 {
+  color: #99CC99;
+}
+
+/* image */
+.cm-tag,
+.cm-tag + .cm-string,
+.cm-tag + .cm-string + .cm-url,
+.cm-tag + .cm-string + .cm-string + .cm-string {
+  color: #F2777A;
+}
+
+/* link */
+.cm-link,
+.cm-formatting-link,
+.cm-url {
+  color: #66CCCC;
 }
 
 .CodeMirror div.CodeMirror-cursor {
-  border-left-color: #c2c6cb;
+  border-left-color: #D3D0C8;
 }
 
 .CodeMirror-selected {
   background-color: #4f5a67 !important;
 }
-
 
 #preview {
   border-left-color: #323742;
