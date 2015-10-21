@@ -1,0 +1,36 @@
+body,
+.CodeMirror,
+#statusbar
+{
+  background-color: #222631;
+  color: #c2c6cb;
+}
+
+/*.CodeMirror,*/
+#preview,
+.cm-header-1,
+.cm-header-2,
+.cm-header-3,
+.cm-header-4,
+.cm-header-5,
+.cm-header-6
+{
+  color: #c2c6cb;
+}
+
+.CodeMirror div.CodeMirror-cursor {
+  border-left-color: #c2c6cb;
+}
+
+.CodeMirror-selected {
+  background-color: #4f5a67 !important;
+}
+
+
+#preview {
+  border-left-color: #323742;
+}
+
+#statusbar {
+  border-top-color: #323742;
+}

@@ -1,12 +1,14 @@
 {
   "name": "gin",
-  "version": "0.6.3",
+  "version": "0.7.0",
+  "productName": "Gin",
+  "electronVersion": "0.33.6",
   "description": "JavaScript Markdown Editor for Mac",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build": "electron-packager ./ Gin --out=dist --overwrite --platform=darwin --arch=x64 --version=0.30.6 --app-version=0.6.3 --icon=./public/assets/Gin.icns"
+    "build": "electron-packager . $npm_package_productName --overwrite --out=dist --platform=darwin --arch=x64 --version=$npm_package_electronVersion --app-version=$npm_package_version --icon=./assets/Icon.icns --app-bundle-id=com.mariuskueng.${npm_package_name}"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,6 @@
   },
   "devDependencies": {
     "electron-packager": "^5.0.0",
-    "electron-prebuilt": "^0.30.6"
+    "electron-prebuilt": "^0.33.6"
   }
 }

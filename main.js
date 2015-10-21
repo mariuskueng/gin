@@ -1,16 +1,13 @@
 var app = require('app');  // Module to control application life.
-var BrowserWindow = require('browser-window');  // Module to create native browser window.
-var dialog = require('dialog');
-var path = require('path');
+var BrowserWindow = require('browser-window');
 var ipc = require('ipc');
-var fs = require('fs');
 var Menu = require('menu');
+var dialog = require('dialog');
+var shell = require('shell');
+var settings = require('./settings');
 
 // Report crashes to our server.
 require('crash-reporter').start();
-
-var windowSize = {};
-var settingsFile = __dirname + '/public/assets/settings.json';
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function() {
@@ -38,24 +35,31 @@ app.on('activate-with-no-open-windows', function(event) {
   newFile();
 });
 
-function newFile(passedFile) {
+
+function newFile (passedFile) {
   // Read settings
-  var settings = readSettings();
+  var editorSettings = settings.readSettings();
+
+  var windowSize = {};
 
   // set saved window size
-  windowSize.width = settings.width;
-  windowSize.height = settings.height;
+  windowSize.width = editorSettings.width;
+  windowSize.height = editorSettings.height;
 
   // Create the browser window.
   // Keep a global reference of the window object, if you don't, the window will
   // be closed automatically when the JavaScript object is GCed.
   var w = new BrowserWindow({
     show: false,
-    width: settings.width ? settings.width : 800,
-    height: settings.height ? settings.height : 600,
+    width: editorSettings.width ? editorSettings.width : 800,
+    height: editorSettings.height ? editorSettings.height : 600,
     'min-width': 400,
     'min-height': 200
   });
+
+  function sendAction(action, value) {
+  	w.webContents.send(action, value);
+  }
 
   var menuTemplate = [
     {
@@ -102,7 +106,9 @@ function newFile(passedFile) {
         {
           label: 'Quit',
           accelerator: 'CmdOrCtrl+Q',
-          selector: 'terminate:'
+          click: function() {
+            app.quit();
+          }
         },
       ]
     },
@@ -113,7 +119,6 @@ function newFile(passedFile) {
           label: 'New File',
           accelerator: 'Cmd+N',
           click: function() {
-            console.log('New file');
             newFile();
           }
         },
@@ -122,6 +127,7 @@ function newFile(passedFile) {
           accelerator: 'Cmd+O',
           click: function() {
             var properties = ['createDirectory', 'openFile'];
+            var win = BrowserWindow.getFocusedWindow();
 
             dialog.showOpenDialog({
               properties: properties,
@@ -133,7 +139,7 @@ function newFile(passedFile) {
               if (file === undefined)
                   return;
               else
-                newFile(file[0]);
+  							newFile(file[0]);
             });
           }
         },
@@ -141,8 +147,7 @@ function newFile(passedFile) {
           label: 'Save File...',
           accelerator: 'Cmd+S',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('write-file');
+            sendAction('write-file');
           }
         },
         {
@@ -152,9 +157,8 @@ function newFile(passedFile) {
           label: 'Print...',
           accelerator: 'Cmd+P',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('render-markdown');
-            window.print();
+            sendAction('render-markdown');
+            BrowserWindow.getFocusedWindow().print();
           }
         }
       ]
@@ -204,47 +208,41 @@ function newFile(passedFile) {
           label: 'Link',
           accelerator: 'Cmd+K',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('format-link');
+            sendAction('format-link');
           }
         },
         {
           label: 'Bold',
           accelerator: 'Cmd+B',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('format-bold');
+            sendAction('format-bold');
           }
         },
         {
           label: 'Italic',
           accelerator: 'Cmd+I',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('format-italic');
+            sendAction('format-italic');
           }
         },
         {
           label: 'Underline',
           accelerator: 'Cmd+U',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('format-underline');
+            sendAction('format-underline');
           }
         },
         {
           label: 'Strikethrough',
           accelerator: 'Cmd+Shift+T',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('format-strikethrough');
+            sendAction('format-strikethrough');
           }
         },
         {
           label: 'Inline Code',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('format-inline-code');
+            sendAction('format-inline-code');
           }
         }
       ]
@@ -256,16 +254,14 @@ function newFile(passedFile) {
           label: 'Toggle Status Bar',
           accelerator: 'Cmd+/',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('toggle-statusbar');
+            sendAction('toggle-statusbar');
           }
         },
         {
           label: 'Toggle Preview',
           accelerator: 'Alt+Cmd+P',
           click: function() {
-            var window = BrowserWindow.getFocusedWindow();
-            window.webContents.send('toggle-preview');
+            sendAction('toggle-preview');
           }
         },
         {
@@ -301,6 +297,23 @@ function newFile(passedFile) {
       ]
     },
     {
+      label: 'Themes',
+      submenu: [
+        {
+          label: 'Gin Light',
+          click: function() {
+            sendAction('toggle-theme', 'gin');
+          }
+        },
+        {
+          label: 'Gin Dark',
+          click: function() {
+            sendAction('toggle-theme', 'gin-dark');
+          }
+        }
+      ]
+    },
+    {
       label: 'Window',
       submenu: [
         {
@@ -324,7 +337,14 @@ function newFile(passedFile) {
     },
     {
       label: 'Help',
-      submenu: []
+      submenu: [
+        {
+    		label: 'Gin Website...',
+    		click: function() {
+    			shell.openExternal('https://github.com/mariuskueng/gin');
+    		}
+  	   }
+     ]
     }
   ];
 
@@ -336,7 +356,10 @@ function newFile(passedFile) {
   w.loadUrl(indexPath);
 
   w.webContents.on("did-finish-load", function() {
-    w.webContents.send('load-settings', settings);
+    w.webContents.send('load-settings', editorSettings);
+
+    if (editorSettings.theme)
+      w.webContents.send('set-theme', editorSettings.theme);
 
     if (passedFile) {
       w.webContents.send('read-file', passedFile);
@@ -350,8 +373,12 @@ function newFile(passedFile) {
 
   w.on('close', function(e) {
     // save current window size to settings
-    var settings = readSettings();
-    writeSettings(settings);
+    editorSettings = settings.readSettings();
+    if (windowSize) {
+      editorSettings.width = windowSize.width;
+      editorSettings.height = windowSize.height;
+    }
+    settings.writeSettings(editorSettings);
   });
 
   // Emitted when the window is closed.
@@ -362,30 +389,4 @@ function newFile(passedFile) {
     // when you should delete the corresponding element.
     w = null;
   });
-}
-
-function readSettings() {
-  var settings = {};
-  try {
-    var data = fs.readFileSync(settingsFile, 'utf8');
-    if (data !== undefined) {
-      settings = JSON.parse(data);
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return settings;
-}
-
-function writeSettings(settings) {
-  if (windowSize) {
-    settings.width = windowSize.width;
-    settings.height = windowSize.height;
-  }
-
-  try {
-    fs.writeFile(settingsFile, JSON.stringify(settings));
-  } catch (e) {
-    console.error(e);
-  }
 }
