@@ -21,12 +21,6 @@ It's inspired by [Sam Soffes'](https://github.com/soffes) [Whiskey](http://usewh
 $ npm install
 ```
 
-### Install bower components
-
-```
-$ bower install
-```
-
 ### Start app
 
 ```

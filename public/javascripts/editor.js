@@ -9,6 +9,16 @@ var clipboard = require('clipboard');
 var path = require('path');
 var settings = require('./settings');
 
+// CodeMirror Add-ons
+require('codemirror/addon/mode/overlay.js');
+require('codemirror/mode/markdown/markdown.js');
+require('codemirror/mode/gfm/gfm.js');
+require('codemirror/addon/edit/closebrackets.js');
+require('codemirror/addon/edit/continuelist.js');
+require('codemirror/addon/selection/mark-selection.js');
+// CodeMirror
+var CodeMirror = require('codemirror/lib/codemirror');
+
 var win,
     editor,
     preview,
