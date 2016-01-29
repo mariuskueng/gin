@@ -1,5 +1,5 @@
 var remote = require('remote');
-var ipc = require('ipc');
+var ipc = require('electron').ipcRenderer;
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
 var fs = require('fs');
@@ -31,7 +31,7 @@ File.readFile = function(newFile) {
   }
 };
 
-ipc.on('read-file', function(path) {
+ipc.on('read-file', function(event, path) {
   File.readFile(path);
 });
 

@@ -2,7 +2,7 @@
   "name": "gin",
   "version": "0.7.2",
   "productName": "Gin",
-  "electronVersion": "0.33.6",
+  "electronVersion": "0.36.4",
   "description": "JavaScript Markdown Editor for Mac",
   "main": "main.js",
   "scripts": {

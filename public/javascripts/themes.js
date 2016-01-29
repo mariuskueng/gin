@@ -1,4 +1,4 @@
-var ipc = require('ipc');
+var ipc = require('electron').ipcRenderer;
 var settings = require('./settings');
 
 function createLink(name) {
@@ -36,11 +36,10 @@ ipc.on('load-settings', function(editorSettings) {
     toggleTheme(editorSettings.theme);
 });
 
-ipc.on('toggle-theme', function(name) {
+ipc.on('toggle-theme', function(event, name) {
   toggleTheme(name);
 });
 
-ipc.on('set-theme', function(name) {
-  // console.log('yolo theme')
+ipc.on('set-theme', function(event, name) {
   setTheme(name);
 });

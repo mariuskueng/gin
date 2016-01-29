@@ -1,6 +1,6 @@
 var remote = require('remote');
 var app = remote.require('app');
-var ipc = require('ipc');
+var ipc = require('electron').ipcRenderer;
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
 var shell = remote.require('shell');
