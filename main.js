@@ -14,9 +14,17 @@ let file;
 let menuTemplate;
 let allWindowsClosed;
 
-function sendAction (action, value) {
-  let win = BrowserWindow.getFocusedWindow();
-  win.webContents.send(action, value);
+function sendAction (action, value, sendToAllWindows) {
+  if (sendToAllWindows) {
+    let windows = BrowserWindow.getAllWindows();
+    for (let w of windows) {
+      w.webContents.send(action, value);
+    }
+  }
+  else {
+    let win = BrowserWindow.getFocusedWindow();
+    win.webContents.send(action, value);
+  }
 }
 
 function newFile (filePath) {
@@ -327,13 +335,13 @@ menuTemplate = [
       {
         label: 'Gin Light',
         click: () => {
-          sendAction('toggle-theme', 'gin');
+          sendAction('toggle-theme', 'gin', true);
         }
       },
       {
         label: 'Gin Dark',
         click: () => {
-          sendAction('toggle-theme', 'gin-dark');
+          sendAction('toggle-theme', 'gin-dark', true);
         }
       }
     ]
