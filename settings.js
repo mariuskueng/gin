@@ -1,25 +1,29 @@
-var fs = require('fs');
+'use strict';
 
-var settingsFile = __dirname + '/assets/settings.json';
+const fs = require('fs');
+
+const settingsFile = __dirname + '/assets/settings.json';
 
 module.exports = {
-  readSettings: function() {
-    var settings = {};
+  readSettings: () => {
+    let settings = {};
     try {
-      var data = fs.readFileSync(settingsFile, 'utf8');
+      let data = fs.readFileSync(settingsFile, 'utf8');
       if (data !== undefined) {
         settings = JSON.parse(data);
       }
-    } catch (e) {
+    }
+    catch (e) {
       console.error(e);
     }
     return settings;
   },
 
-  writeSettings: function(settings) {
+  writeSettings: (settings) => {
     try {
       fs.writeFile(settingsFile, JSON.stringify(settings));
-    } catch (e) {
+    }
+    catch (e) {
       console.error(e);
     }
   }

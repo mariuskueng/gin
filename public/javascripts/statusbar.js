@@ -1,36 +1,39 @@
-// statusbar
-
 var statusbarVisible;
 
-function getStatusBarText(value, text) {
+function getStatusBarText (value, text) {
   var statusBarText = value + ' ' + text;
-  if (value > 1 || value < 1) statusBarText += 's';
+  if (value > 1 || value < 1) {
+    statusBarText += 's';
+  }
   return statusBarText;
 }
 
-function countWords() {
+function countWords () {
   var statusWords = document.querySelector('.status-words');
   var wordsCount = 0;
 
-  if (cm.getValue()) wordsCount = cm.getValue().split(' ').length;
+  if (cm.getValue()) {
+    wordsCount = cm.getValue().split(' ').length;
+  }
 
   statusWords.innerHTML = getStatusBarText(wordsCount, 'word');
 
   return wordsCount;
 }
 
-function countCharacters() {
+function countCharacters () {
   var statusChars = document.querySelector('.status-chars');
   var charsCount = 0;
 
-  if (cm.getValue()) charsCount = cm.getValue().length;
+  if (cm.getValue()) {
+    charsCount = cm.getValue().length;
+  }
 
   statusChars.innerHTML = getStatusBarText(charsCount, 'character');
-
   return charsCount;
 }
 
-function setReadingDuration(wordsCount) {
+function setReadingDuration (wordsCount) {
   var statusReading = document.querySelector('.status-duration');
   var timeUnit = 'second';
   var wpm = 250; // words per minute
@@ -39,7 +42,8 @@ function setReadingDuration(wordsCount) {
   if (wordsCount >= wpm) {
     // minutes
     timeUnit = 'minute';
-  } else {
+  }
+  else {
     // seconds
     time = time * 60;
   }
@@ -51,7 +55,7 @@ function setReadingDuration(wordsCount) {
   return time;
 }
 
-function renderStatusBarValues() {
+function renderStatusBarValues () {
   var wordsCount = countWords();
   countCharacters();
   setReadingDuration(wordsCount);

@@ -1,5 +1,5 @@
 var remote = require('remote');
-var ipc = require('ipc');
+var ipc = require('electron').ipcRenderer;
 var BrowserWindow = remote.require('browser-window');
 var dialog = remote.require('dialog');
 var fs = require('fs');
@@ -14,10 +14,12 @@ var File = {
 
 // File operations
 
-File.readFile = function(newFile) {
+File.readFile = function (newFile) {
   if (newFile) {
-    fs.readFile(newFile, 'utf8', function(err, data) {
-      if (err) throw err;
+    fs.readFile(newFile, 'utf8', function (err, data) {
+      if (err) {
+        throw err;
+      }
       File.path = newFile;
       File.text = data;
       cm.setValue(File.text);
@@ -31,34 +33,39 @@ File.readFile = function(newFile) {
   }
 };
 
-ipc.on('read-file', function(path) {
+ipc.on('read-file', function (event, path) {
   File.readFile(path);
 });
 
-File.writeFile = function(callback) {
+File.writeFile = function (callback) {
   if (File.path) {
     File.text = cm.getValue();
     fs.writeFile(File.path, File.text, 'utf8', function() {
       console.log('Wrote a file.');
-      if (callback) callback();
+      if (callback) {
+        callback();
+      }
     });
-  } else {
+  }
+  else {
     console.log('no file specified. create new file.');
     File.createFile(callback);
   }
 };
 
-ipc.on('write-file', function() {
+ipc.on('write-file', function () {
   File.writeFile();
 });
 
-File.createFile = function(callback) {
+File.createFile = function (callback) {
   dialog.showSaveDialog({ filters: [
      { name: 'Markdown', extensions: ['md', 'markdown'] }
-    ]}, function (fileName) {
+    ] }, function (fileName) {
       if (fileName === undefined) {
         // if dialog gets closed without saving run callback and return
-        if (callback) callback();
+        if (callback) {
+          callback();
+        }
         return;
       }
 
@@ -66,11 +73,14 @@ File.createFile = function(callback) {
       File.writeFile(function (err){
         if (err === undefined) {
           setWindowTitle(File.path);
-        } else {
+        }
+        else {
           dialog.showErrorBox("File Save Error", err.message);
         }
       });
-      if (callback) callback();
+      if (callback) {
+        callback();
+      }
     }
   );
 };

@@ -1,377 +1,81 @@
-var app = require('app');  // Module to control application life.
-var BrowserWindow = require('browser-window');
-var ipc = require('ipc');
-var Menu = require('menu');
-var dialog = require('dialog');
-var shell = require('shell');
-var settings = require('./settings');
+'use strict';
 
-// Report crashes to our server.
-require('crash-reporter').start();
+// imports
+const app = require('app');  // Module to control application life.
+const BrowserWindow = require('browser-window');
+const ipc = require('electron').ipcMain;
+const Menu = require('menu');
+const dialog = require('dialog');
+const shell = require('shell');
+const settings = require('./settings');
 
-// Quit when all windows are closed.
-app.on('window-all-closed', function() {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform != 'darwin') {
-    app.quit();
+// globals
+let file;
+let menuTemplate;
+let allWindowsClosed;
+
+function sendAction (action, value, sendToAllWindows) {
+  if (sendToAllWindows) {
+    let windows = BrowserWindow.getAllWindows();
+    for (let w of windows) {
+      w.webContents.send(action, value);
+    }
   }
-});
+  else {
+    let win = BrowserWindow.getFocusedWindow();
+    win.webContents.send(action, value);
+  }
+}
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-app.on('ready', function() {
-  // create new file
-  newFile();
-});
-
-app.on('open-file', function(event, path) {
-  setTimeout(function () {
-    newFile(path);
-  }, 500);
-});
-
-app.on('activate-with-no-open-windows', function(event) {
-  newFile();
-});
-
-
-function newFile (passedFile) {
+function newFile (filePath) {
+  allWindowsClosed = false;
   // Read settings
-  var editorSettings = settings.readSettings();
+  let editorSettings = settings.readSettings();
+  let windowSize = {
+    width: editorSettings.width,
+    height: editorSettings.height
+  };
 
-  var windowSize = {};
+  let menu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(menu);
 
-  // set saved window size
-  windowSize.width = editorSettings.width;
-  windowSize.height = editorSettings.height;
+  // define path of index.html
+  let indexPath = 'file://' + __dirname + '/index.html';
 
   // Create the browser window.
   // Keep a global reference of the window object, if you don't, the window will
   // be closed automatically when the JavaScript object is GCed.
-  var w = new BrowserWindow({
+  let win = new BrowserWindow({
     show: false,
     width: editorSettings.width ? editorSettings.width : 800,
     height: editorSettings.height ? editorSettings.height : 600,
-    'min-width': 400,
-    'min-height': 200
+    minWidth: 400,
+    minHeight: 200
   });
 
-  function sendAction(action, value) {
-  	w.webContents.send(action, value);
-  }
-
-  var menuTemplate = [
-    {
-      label: 'Gin',
-      submenu: [
-        {
-          label: 'About Gin',
-          selector: 'orderFrontStandardAboutPanel:'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Preferences...',
-          accelerator: 'Cmd+,',
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Services',
-          submenu: []
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Hide Gin',
-          accelerator: 'CmdOrCtrl+H',
-          selector: 'hide:'
-        },
-        {
-          label: 'Hide Others',
-          accelerator: 'CmdOrCtrl+Shift+H',
-          selector: 'hideOtherApplications:'
-        },
-        {
-          label: 'Show All',
-          selector: 'unhideAllApplications:'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Quit',
-          accelerator: 'CmdOrCtrl+Q',
-          click: function() {
-            app.quit();
-          }
-        },
-      ]
-    },
-    {
-      label: 'File',
-      submenu: [
-        {
-          label: 'New File',
-          accelerator: 'Cmd+N',
-          click: function() {
-            newFile();
-          }
-        },
-        {
-          label: 'Open File...',
-          accelerator: 'Cmd+O',
-          click: function() {
-            var properties = ['createDirectory', 'openFile'];
-            var win = BrowserWindow.getFocusedWindow();
-
-            dialog.showOpenDialog({
-              properties: properties,
-              filters: [
-                  { name: 'text', extensions: ['md', 'markdown'] }
-              ]
-            }, function(file) {
-              console.log("got a file: " + file);
-              if (file === undefined)
-                  return;
-              else
-  							newFile(file[0]);
-            });
-          }
-        },
-        {
-          label: 'Save File...',
-          accelerator: 'Cmd+S',
-          click: function() {
-            sendAction('write-file');
-          }
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Print...',
-          accelerator: 'Cmd+P',
-          click: function() {
-            sendAction('render-markdown');
-            BrowserWindow.getFocusedWindow().print();
-          }
-        }
-      ]
-    },
-    {
-      label: 'Edit',
-      submenu: [
-        {
-          label: 'Undo',
-          accelerator: 'CmdOrCtrl+Z',
-          selector: 'undo:'
-        },
-        {
-          label: 'Redo',
-          accelerator: 'Shift+CmdOrCtrl+Z',
-          selector: 'redo:'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Cut',
-          accelerator: 'CmdOrCtrl+X',
-          selector: 'cut:'
-        },
-        {
-          label: 'Copy',
-          accelerator: 'CmdOrCtrl+C',
-          selector: 'copy:'
-        },
-        {
-          label: 'Paste',
-          accelerator: 'CmdOrCtrl+V',
-          selector: 'paste:'
-        },
-        {
-          label: 'Select All',
-          accelerator: 'CmdOrCtrl+A',
-          selector: 'selectAll:'
-        }
-      ]
-    },
-    {
-      label: 'Format',
-      submenu: [
-        {
-          label: 'Link',
-          accelerator: 'Cmd+K',
-          click: function() {
-            sendAction('format-link');
-          }
-        },
-        {
-          label: 'Bold',
-          accelerator: 'Cmd+B',
-          click: function() {
-            sendAction('format-bold');
-          }
-        },
-        {
-          label: 'Italic',
-          accelerator: 'Cmd+I',
-          click: function() {
-            sendAction('format-italic');
-          }
-        },
-        {
-          label: 'Underline',
-          accelerator: 'Cmd+U',
-          click: function() {
-            sendAction('format-underline');
-          }
-        },
-        {
-          label: 'Strikethrough',
-          accelerator: 'Cmd+Shift+T',
-          click: function() {
-            sendAction('format-strikethrough');
-          }
-        },
-        {
-          label: 'Inline Code',
-          click: function() {
-            sendAction('format-inline-code');
-          }
-        }
-      ]
-    },
-    {
-      label: 'View',
-      submenu: [
-        {
-          label: 'Toggle Status Bar',
-          accelerator: 'Cmd+/',
-          click: function() {
-            sendAction('toggle-statusbar');
-          }
-        },
-        {
-          label: 'Toggle Preview',
-          accelerator: 'Alt+Cmd+P',
-          click: function() {
-            sendAction('toggle-preview');
-          }
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click: function() {
-            BrowserWindow.getFocusedWindow().reload();
-          }
-        },
-        {
-          label: 'Toggle DevTools',
-          accelerator: 'Alt+CmdOrCtrl+I',
-          click: function() {
-            BrowserWindow.getFocusedWindow().toggleDevTools();
-          }
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Toggle Fullscreen',
-          accelerator: 'Alt+Cmd+F',
-          click: function() {
-            if (BrowserWindow.getFocusedWindow().isFullScreen())
-              BrowserWindow.getFocusedWindow().setFullScreen(false);
-            else
-              BrowserWindow.getFocusedWindow().setFullScreen(true);
-          }
-        }
-      ]
-    },
-    {
-      label: 'Themes',
-      submenu: [
-        {
-          label: 'Gin Light',
-          click: function() {
-            sendAction('toggle-theme', 'gin');
-          }
-        },
-        {
-          label: 'Gin Dark',
-          click: function() {
-            sendAction('toggle-theme', 'gin-dark');
-          }
-        }
-      ]
-    },
-    {
-      label: 'Window',
-      submenu: [
-        {
-          label: 'Minimize',
-          accelerator: 'CmdOrCtrl+M',
-          selector: 'performMiniaturize:'
-        },
-        {
-          label: 'Close',
-          accelerator: 'CmdOrCtrl+W',
-          selector: 'performClose:'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Bring All to Front',
-          selector: 'arrangeInFront:'
-        }
-      ]
-    },
-    {
-      label: 'Help',
-      submenu: [
-        {
-    		label: 'Gin Website...',
-    		click: function() {
-    			shell.openExternal('https://github.com/mariuskueng/gin');
-    		}
-  	   }
-     ]
-    }
-  ];
-
-  var menu = Menu.buildFromTemplate(menuTemplate);
-  Menu.setApplicationMenu(menu);
-
   // and load the index.html of the app.
-  var indexPath = 'file://' + __dirname + '/index.html';
-  w.loadUrl(indexPath);
+  win.loadURL(indexPath);
 
-  w.webContents.on("did-finish-load", function() {
-    w.webContents.send('load-settings', editorSettings);
+  // load the settings after window has been loaded
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('load-settings', editorSettings);
 
-    if (editorSettings.theme)
-      w.webContents.send('set-theme', editorSettings.theme);
-
-    if (passedFile) {
-      w.webContents.send('read-file', passedFile);
+    if (editorSettings.theme) {
+      win.webContents.send('set-theme', editorSettings.theme);
     }
 
-    w.show();
+    if (filePath) {
+      win.webContents.send('read-file', filePath);
+    }
+
+    // show the window
+    win.show();
   });
 
   // Open the devtools.
   // w.openDevTools();
 
-  w.on('close', function(e) {
+  win.on('close', (e) => {
     // save current window size to settings
     editorSettings = settings.readSettings();
     if (windowSize) {
@@ -382,11 +86,335 @@ function newFile (passedFile) {
   });
 
   // Emitted when the window is closed.
-  w.on('closed', function(e) {
+  win.on('closed', (e) => {
     e.preventDefault();
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    w = null;
+    win = null;
   });
 }
+
+menuTemplate = [
+  {
+    label: 'Gin',
+    submenu: [
+      {
+        label: 'About Gin',
+        selector: 'orderFrontStandardAboutPanel:'
+      },
+      {
+        type: 'separator'
+      },
+      // {
+      //   label: 'Preferences...',
+      //   accelerator: 'Cmd+,'
+      // },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Services',
+        submenu: []
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Hide Gin',
+        accelerator: 'CmdOrCtrl+H',
+        selector: 'hide:'
+      },
+      {
+        label: 'Hide Others',
+        accelerator: 'CmdOrCtrl+Shift+H',
+        selector: 'hideOtherApplications:'
+      },
+      {
+        label: 'Show All',
+        selector: 'unhideAllApplications:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Quit',
+        accelerator: 'CmdOrCtrl+Q',
+        click: () => {
+          app.quit();
+        }
+      }
+    ]
+  },
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'New File',
+        accelerator: 'Cmd+N',
+        click: () => {
+          newFile();
+        }
+      },
+      {
+        label: 'Open File...',
+        accelerator: 'Cmd+O',
+        click: () => {
+          let properties = ['createDirectory', 'openFile'];
+          dialog.showOpenDialog({
+            properties: properties,
+            filters: [
+              { name: 'text', extensions: ['md', 'markdown'] }
+            ]
+          }, (path) => {
+            if (path) {
+              newFile(path[0]);
+              console.log('got a file: ' + path);
+            }
+          });
+        }
+      },
+      {
+        label: 'Save File...',
+        accelerator: 'Cmd+S',
+        click: () => {
+          sendAction('write-file');
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Print...',
+        accelerator: 'Cmd+P',
+        click: () => {
+          sendAction('render-markdown');
+          BrowserWindow.getFocusedWindow().print();
+        }
+      }
+    ]
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'CmdOrCtrl+Z',
+        selector: 'undo:'
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Shift+CmdOrCtrl+Z',
+        selector: 'redo:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Cut',
+        accelerator: 'CmdOrCtrl+X',
+        selector: 'cut:'
+      },
+      {
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        selector: 'copy:'
+      },
+      {
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        selector: 'paste:'
+      },
+      {
+        label: 'Select All',
+        accelerator: 'CmdOrCtrl+A',
+        selector: 'selectAll:'
+      }
+    ]
+  },
+  {
+    label: 'Format',
+    submenu: [
+      {
+        label: 'Link',
+        accelerator: 'Cmd+K',
+        click: () => {
+          sendAction('format-link');
+        }
+      },
+      {
+        label: 'Bold',
+        accelerator: 'Cmd+B',
+        click: () => {
+          sendAction('format-bold');
+        }
+      },
+      {
+        label: 'Italic',
+        accelerator: 'Cmd+I',
+        click: () => {
+          sendAction('format-italic');
+        }
+      },
+      {
+        label: 'Underline',
+        accelerator: 'Cmd+U',
+        click: () => {
+          sendAction('format-underline');
+        }
+      },
+      {
+        label: 'Strikethrough',
+        accelerator: 'Cmd+Shift+T',
+        click: () => {
+          sendAction('format-strikethrough');
+        }
+      },
+      {
+        label: 'Inline Code',
+        click: () => {
+          sendAction('format-inline-code');
+        }
+      }
+    ]
+  },
+  {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Toggle Status Bar',
+        accelerator: 'Cmd+/',
+        click: () => {
+          sendAction('toggle-statusbar');
+        }
+      },
+      {
+        label: 'Toggle Preview',
+        accelerator: 'Alt+Cmd+P',
+        click: () => {
+          sendAction('toggle-preview');
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        click: () => {
+          BrowserWindow.getFocusedWindow().reload();
+        }
+      },
+      {
+        label: 'Toggle DevTools',
+        accelerator: 'Alt+CmdOrCtrl+I',
+        click: () => {
+          BrowserWindow.getFocusedWindow().toggleDevTools();
+        }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Toggle Fullscreen',
+        accelerator: 'Alt+Cmd+F',
+        click: () => {
+          if (BrowserWindow.getFocusedWindow().isFullScreen()) {
+            BrowserWindow.getFocusedWindow().setFullScreen(false);
+          }
+          else {
+            BrowserWindow.getFocusedWindow().setFullScreen(true);
+          }
+        }
+      }
+    ]
+  },
+  {
+    label: 'Themes',
+    submenu: [
+      {
+        label: 'Gin Light',
+        click: () => {
+          sendAction('toggle-theme', 'gin', true);
+        }
+      },
+      {
+        label: 'Gin Dark',
+        click: () => {
+          sendAction('toggle-theme', 'gin-dark', true);
+        }
+      }
+    ]
+  },
+  {
+    label: 'Window',
+    submenu: [
+      {
+        label: 'Minimize',
+        accelerator: 'CmdOrCtrl+M',
+        selector: 'performMiniaturize:'
+      },
+      {
+        label: 'Close',
+        accelerator: 'CmdOrCtrl+W',
+        selector: 'performClose:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Bring All to Front',
+        selector: 'arrangeInFront:'
+      }
+    ]
+  },
+  {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Gin Website...',
+        click: () => {
+          shell.openExternal('https://github.com/mariuskueng/gin');
+        }
+      }
+   ]
+  }
+];
+
+// app events
+
+// Quit when all windows are closed.
+app.on('window-all-closed', function () {
+  allWindowsClosed = true;
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('will-finish-launching', () => {
+  app.on('open-file', (event, path) => {
+    // if app is running open a new window
+    if (BrowserWindow.getFocusedWindow() || allWindowsClosed) {
+      newFile(path);
+    }
+    // if app is not running set file for ready event
+    else {
+      file = path;
+    }
+  });
+});
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+app.on('ready', () => {
+  // create new window with file
+  newFile(file);
+});
+
+app.on('activate', (event) => {
+  if (!BrowserWindow.getFocusedWindow()) {
+    newFile();
+  }
+});
