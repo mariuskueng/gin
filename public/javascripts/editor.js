@@ -23,15 +23,16 @@ var win,
     editor,
     preview,
     previewVisible,
+    statusbarVisible,
     converter,
     cm,
     menu,
     text;
 
-onload = function() {
+onload = function () {
   win = BrowserWindow.getFocusedWindow();
-  editor = document.getElementById("editor");
-  preview = document.getElementById("preview");
+  editor = document.getElementById('editor');
+  preview = document.getElementById('preview');
 
   previewVisible = false;
   statusbarVisible = false;
@@ -68,9 +69,13 @@ onload = function() {
   );
 
   // re-render Markdown on every CodeMirror change event
-  cm.on("change", function(e) {
-    if (previewVisible) renderMarkdown();
-    if (statusbarVisible) renderStatusBarValues();
+  cm.on('change', function (e) {
+    if (previewVisible) {
+      renderMarkdown();
+    }
+    if (statusbarVisible) {
+      renderStatusBarValues();
+    }
   });
 
   window.onbeforeunload = function(e) {
@@ -123,7 +128,7 @@ onload = function() {
   };
 };
 
-function setWindowTitle(title) {
+function setWindowTitle (title) {
   if (title.indexOf('/') > -1) {
     var titleParts = title.split('/');
     title = titleParts[titleParts.length - 1];
@@ -132,7 +137,7 @@ function setWindowTitle(title) {
   BrowserWindow.getFocusedWindow().setTitle(File.name);
 }
 
-function togglePreview(dontSaveSettings) {
+function togglePreview (dontSaveSettings) {
   previewVisible = previewVisible === false ? true : false;
   document.body.classList.toggle('preview-visible');
   renderMarkdown();
@@ -145,11 +150,11 @@ function togglePreview(dontSaveSettings) {
   }
 }
 
-ipc.on('toggle-preview', function() {
+ipc.on('toggle-preview', function () {
   togglePreview();
 });
 
-function toggleStatusBar(dontSaveSettings) {
+function toggleStatusBar (dontSaveSettings) {
   statusbarVisible = statusbarVisible === false ? true : false;
   document.body.classList.toggle('statusbar-visible');
   renderStatusBarValues();
@@ -162,11 +167,11 @@ function toggleStatusBar(dontSaveSettings) {
   }
 }
 
-ipc.on('toggle-statusbar', function() {
+ipc.on('toggle-statusbar', function () {
   toggleStatusBar();
 });
 
-function renderMarkdown() {
+function renderMarkdown () {
   preview.innerHTML = converter.makeHtml(cm.getValue());
 
   var links = document.querySelectorAll('#preview a');
@@ -184,16 +189,16 @@ function renderMarkdown() {
   }
 }
 
-ipc.on('render-markdown', function() {
+ipc.on('render-markdown', function () {
   renderMarkdown();
 });
 
-function clickLinkEvent(e) {
+function clickLinkEvent (e) {
   e.preventDefault();
   shell.openExternal(e.srcElement.href);
 }
 
-function setWindowSize() {
+function setWindowSize () {
   var win = BrowserWindow.getFocusedWindow();
   if (win) {
     var currentWindowSize = win.getSize();
@@ -204,12 +209,11 @@ function setWindowSize() {
   }
 }
 
-ipc.on('write-settings', function(editorSettings) {
+ipc.on('write-settings', function (event, editorSettings) {
   settings.writeSettings(editorSettings);
 });
 
-
-ipc.on('load-settings', function(editorSettings) {
+ipc.on('load-settings', function (event, editorSettings) {
   if (editorSettings.isPreviewVisible) {
     // resaving setting is not necessary
     togglePreview(true);

@@ -1,3 +1,5 @@
+var Countable = require('countable');
+
 var statusbarVisible;
 
 function getStatusBarText (value, text) {
@@ -8,55 +10,32 @@ function getStatusBarText (value, text) {
   return statusBarText;
 }
 
-function countWords () {
+function countWords (counter) {
   var statusWords = document.querySelector('.status-words');
-  var wordsCount = 0;
-
-  if (cm.getValue()) {
-    wordsCount = cm.getValue().split(' ').length;
-  }
-
-  statusWords.innerHTML = getStatusBarText(wordsCount, 'word');
-
-  return wordsCount;
+  statusWords.innerHTML = getStatusBarText(counter.words, 'word');
 }
 
-function countCharacters () {
+function countCharacters (counter) {
   var statusChars = document.querySelector('.status-chars');
-  var charsCount = 0;
-
-  if (cm.getValue()) {
-    charsCount = cm.getValue().length;
-  }
-
-  statusChars.innerHTML = getStatusBarText(charsCount, 'character');
-  return charsCount;
+  statusChars.innerHTML = getStatusBarText(counter.characters, 'character');
 }
 
-function setReadingDuration (wordsCount) {
+function setReadingDuration (counter) {
   var statusReading = document.querySelector('.status-duration');
-  var timeUnit = 'second';
-  var wpm = 250; // words per minute
-  var time = wordsCount / wpm;
 
-  if (wordsCount >= wpm) {
-    // minutes
-    timeUnit = 'minute';
-  }
-  else {
-    // seconds
-    time = time * 60;
-  }
+  var wpm = 200,
+        estimatedRaw = counter.words / wpm,
+        minutes = Math.round(estimatedRaw);
 
-  time = Math.round(time * 10) / 10;
+  var effectiveTime = (minutes < 1) ? 'a few seconds' : minutes + ' minutes';
 
-  statusReading.innerHTML = getStatusBarText(time, timeUnit);
-
-  return time;
+  statusReading.innerHTML = effectiveTime;
 }
 
 function renderStatusBarValues () {
-  var wordsCount = countWords();
-  countCharacters();
-  setReadingDuration(wordsCount);
+  Countable.once(cm.getWrapperElement(), function (counter) {
+    countWords(counter);
+    countCharacters(counter);
+    setReadingDuration(counter);
+  });
 }

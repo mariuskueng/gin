@@ -1,6 +1,6 @@
 {
   "name": "gin",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "productName": "Gin",
   "electronVersion": "0.36.4",
   "description": "JavaScript Markdown Editor for Mac",
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "codemirror": "^5.10.0",
+    "countable": "^2.1.1",
     "electron-debug": "0.5.1",
     "showdown": "1.3.0"
   },
