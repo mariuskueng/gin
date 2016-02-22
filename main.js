@@ -95,6 +95,44 @@ function newFile (filePath) {
   });
 }
 
+// app events
+
+// Quit when all windows are closed.
+app.on('window-all-closed', function () {
+  allWindowsClosed = true;
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('will-finish-launching', () => {
+  app.on('open-file', (event, path) => {
+    // if app is running open a new window
+    if (BrowserWindow.getFocusedWindow() || allWindowsClosed) {
+      newFile(path);
+    }
+    // if app is not running set file for ready event
+    else {
+      file = path;
+    }
+  });
+});
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+app.on('ready', () => {
+  // create new window with file
+  newFile(file);
+});
+
+app.on('activate', (event) => {
+  if (!BrowserWindow.getFocusedWindow()) {
+    newFile();
+  }
+});
+
 menuTemplate = [
   {
     label: 'Gin',
@@ -380,41 +418,3 @@ menuTemplate = [
    ]
   }
 ];
-
-// app events
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-  allWindowsClosed = true;
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('will-finish-launching', () => {
-  app.on('open-file', (event, path) => {
-    // if app is running open a new window
-    if (BrowserWindow.getFocusedWindow() || allWindowsClosed) {
-      newFile(path);
-    }
-    // if app is not running set file for ready event
-    else {
-      file = path;
-    }
-  });
-});
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-app.on('ready', () => {
-  // create new window with file
-  newFile(file);
-});
-
-app.on('activate', (event) => {
-  if (!BrowserWindow.getFocusedWindow()) {
-    newFile();
-  }
-});

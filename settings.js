@@ -2,7 +2,8 @@
 
 const fs = require('fs');
 
-const settingsFile = __dirname + '/assets/settings.json';
+const settingsFile =
+  process.env.HOME + '/Library/Application\ Support/gin/settings.json';
 
 module.exports = {
   readSettings: () => {
