@@ -82,3 +82,40 @@ ipc.on('format-inline-code', function() {
     cm.replaceSelection(text);
   }
 });
+
+var formatHeading = function(heading) {
+  var text = cm.getSelection();
+  if (text === '') {
+    cm.replaceSelection(heading);
+    var cursor = cm.getCursor();
+    cm.setCursor({line: cursor.line, ch: cursor.ch });
+  }
+  else {
+    text = heading + cm.getSelection();
+    cm.replaceSelection(text);
+  }
+}
+
+ipc.on('format-h1', function() {
+  formatHeading('# ');
+});
+
+ipc.on('format-h2', function() {
+  formatHeading('## ');
+});
+
+ipc.on('format-h3', function() {
+  formatHeading('### ');
+});
+
+ipc.on('format-h4', function() {
+  formatHeading('#### ');
+});
+
+ipc.on('format-h5', function() {
+  formatHeading('##### ');
+});
+
+ipc.on('format-h6', function() {
+  formatHeading('###### ');
+});

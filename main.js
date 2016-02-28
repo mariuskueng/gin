@@ -313,6 +313,51 @@ menuTemplate = [
         click: () => {
           sendAction('format-inline-code');
         }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Heading 1',
+        accelerator: 'Cmd+1',
+        click: () => {
+          sendAction('format-h1');
+        }
+      },
+      {
+        label: 'Heading 2',
+        accelerator: 'Cmd+2',
+        click: () => {
+          sendAction('format-h2');
+        }
+      },
+      {
+        label: 'Heading 3',
+        accelerator: 'Cmd+3',
+        click: () => {
+          sendAction('format-h3');
+        }
+      },
+      {
+        label: 'Heading 4',
+        accelerator: 'Cmd+4',
+        click: () => {
+          sendAction('format-h4');
+        }
+      },
+      {
+        label: 'Heading 5',
+        accelerator: 'Cmd+5',
+        click: () => {
+          sendAction('format-h5');
+        }
+      },
+      {
+        label: 'Heading 6',
+        accelerator: 'Cmd+6',
+        click: () => {
+          sendAction('format-h6');
+        }
       }
     ]
   },
