@@ -202,7 +202,7 @@ menuTemplate = [
           dialog.showOpenDialog({
             properties: properties,
             filters: [
-              { name: 'text', extensions: ['md', 'markdown'] }
+              { name: 'text', extensions: ['md', 'markdown', 'txt'] }
             ]
           }, (path) => {
             if (path) {

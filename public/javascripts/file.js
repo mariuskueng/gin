@@ -58,9 +58,13 @@ ipc.on('write-file', function () {
 });
 
 File.createFile = function (callback) {
-  dialog.showSaveDialog({ filters: [
-     { name: 'Markdown', extensions: ['md', 'markdown'] }
-    ] }, function (fileName) {
+  dialog.showSaveDialog(
+    {
+      filters: [{
+        name: 'Markdown',
+        extensions: ['md', 'markdown', 'txt']
+      }]
+    }, function (fileName) {
       if (fileName === undefined) {
         // if dialog gets closed without saving run callback and return
         if (callback) {
